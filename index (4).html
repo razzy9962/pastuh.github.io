@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TradingGuru" />
+  <meta name="theme-color" content="#0b0f17" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+
+  <title>MOEX // TradingGuru PRO — Интерактивный Терминал</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      /* Institutional Cyber-Obsidian / Bloomberg Pro Palette */
+      --bg: #06080d;
+      --bg-ambient: radial-gradient(1600px 900px at 50% -140px, rgba(30, 41, 59, 0.45), transparent 75%);
+      --panel: #0a0e17;
+      --panel-2: #0f1523;
+      --panel-3: #151e32;
+      --panel-hover: #19243c;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-2: rgba(255, 255, 255, 0.14);
+      --border-glow: rgba(56, 189, 248, 0.35);
+      --card-glass: linear-gradient(180deg, rgba(15, 21, 34, 0.82) 0%, rgba(10, 14, 23, 0.92) 100%);
+      --card-shadow: 0 16px 40px -4px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.07);
+      --header-glass: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.008) 100%);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --dim: #64748b;
+      
+      --green: #10b981;
+      --green-bright: #00f076;
+      --green-dim: rgba(0, 240, 118, 0.12);
+      --green-glow: 0 0 20px rgba(0, 240, 118, 0.3);
+      
+      --red: #f43f5e;
+      --red-bright: #ff3358;
+      --red-dim: rgba(244, 63, 94, 0.12);
+      --red-glow: 0 0 20px rgba(244, 63, 94, 0.3);
+      
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.12);
+      --cyan: #38bdf8;
+      --cyan-dim: rgba(56, 189, 248, 0.12);
+      --cyan-glow: 0 0 18px rgba(56, 189, 248, 0.3);
+      
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.14);
+      --gold: #fbbf24;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Люксовые тонкие скроллбары */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.45); }
+
+    body {
+      background: var(--bg) var(--bg-ambient) fixed no-repeat;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      line-height: 1.48;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.015em;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+    /* ВЕРХНЯЯ ПАНЕЛЬ (TOPBAR) */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 22px; background: rgba(8, 11, 18, 0.88);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky; top: 0; z-index: 60; flex-wrap: wrap; gap: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 38px; height: 38px; border-radius: 11px;
+      background: linear-gradient(135deg, rgba(0, 240, 118, 0.22), rgba(56, 189, 248, 0.18));
+      border: 1px solid rgba(0, 240, 118, 0.45);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--green-bright); font-weight: 800; font-size: 18px;
+      box-shadow: 0 0 20px rgba(0, 240, 118, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+    .brand-title { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; color: #fff; display: flex; align-items: center; gap: 6px; }
+    .brand-title span { color: var(--green-bright); }
+    .brand-tag {
+      font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+      background: linear-gradient(135deg, #00f076, #38bdf8); color: #040810;
+      padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 240, 118, 0.3);
+    }
+    .brand-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; font-weight: 500; }
+
+    .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; background: rgba(18, 25, 38, 0.6); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 11.5px; color: var(--text);
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .secret-input {
+      background: var(--bg); color: var(--amber); border: 1px solid var(--border-2);
+      padding: 3px 8px; border-radius: 6px; width: 72px; font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace; text-align: center; outline: none;
+      transition: border-color 0.2s;
+    }
+    .secret-input:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(56, 189, 248, 0.25); }
+
+    /* Премиальные кнопки */
+    .btn {
+      background: linear-gradient(180deg, rgba(28, 38, 56, 0.55) 0%, rgba(16, 23, 36, 0.8) 100%);
+      color: var(--text); border: 1px solid var(--border-2);
+      padding: 6px 13px; border-radius: var(--radius-sm); font-size: 11.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .btn:hover {
+      border-color: rgba(56, 189, 248, 0.45); color: #fff;
+      background: linear-gradient(180deg, rgba(38, 52, 75, 0.7) 0%, rgba(22, 32, 50, 0.88) 100%);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 14px rgba(56, 189, 248, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn:disabled { opacity: 0.5; cursor: wait; }
+    
+    .btn-green {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+      color: #04160e !important; border: 1px solid rgba(110, 231, 183, 0.4) !important;
+      font-weight: 800 !important; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+    }
+    .btn-green:hover {
+      background: linear-gradient(135deg, #10b981 0%, #00f076 100%) !important;
+      box-shadow: 0 6px 20px rgba(0, 240, 118, 0.45) !important;
+    }
+    
+    .btn-red {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%) !important;
+      color: #fff !important; border: 1px solid rgba(253, 164, 175, 0.4) !important;
+      font-weight: 800 !important; box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35) !important;
+    }
+    .btn-red:hover {
+      background: linear-gradient(135deg, #f43f5e 0%, #ff3358 100%) !important;
+      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.45) !important;
+    }
+    
+    .btn-purple {
+      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
+      color: #fff !important; border: 1px solid rgba(216, 180, 254, 0.4) !important;
+      font-weight: 700 !important; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35) !important;
+    }
+
+    /* БЕГУЩАЯ СТРОКА КОТИРОВОК */
+    .marquee-wrap {
+      background: rgba(4, 6, 11, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: hidden; white-space: nowrap; padding: 7px 0;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+    .marquee { display: inline-block; animation: ticker 70s linear infinite; }
+    .marquee:hover { animation-play-state: paused; }
+    .m-item {
+      display: inline-block; margin: 0 18px; font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px; color: var(--muted); cursor: pointer; transition: color 0.15s;
+    }
+    .m-item:hover { color: #fff; }
+    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    .auth-banner {
+      display: none; background: var(--red-dim); border-bottom: 1px solid var(--red);
+      color: #fecdd3; padding: 9px 18px; font-size: 12.5px; text-align: center;
+    }
+
+    .container { max-width: 1760px; margin: 0 auto; padding: 18px 22px 52px; }
+
+    /* 6 ЭЛИТНЫХ КАРТОЧЕК KPI */
+    .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 13px; margin-bottom: 18px; }
+    .kpi-card {
+      background: linear-gradient(180deg, rgba(22, 30, 46, 0.65) 0%, rgba(12, 17, 27, 0.85) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 17px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative; overflow: hidden;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 20px rgba(56, 189, 248, 0.12);
+    }
+    .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; font-weight: 700; }
+    .kpi-val { font-family: 'JetBrains Mono', monospace; font-size: 21px; font-weight: 800; margin-bottom: 2px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .kpi-sub { font-size: 11px; color: var(--muted); }
+
+    /* ОСНОВНАЯ СЕТКА ТЕРМИНАЛА */
+    .main-grid { display: grid; grid-template-columns: 440px 1fr; gap: 18px; align-items: start; }
+    .card {
+      background: var(--card-glass);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--card-shadow);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover { border-color: rgba(255, 255, 255, 0.12); }
+    .card.fullscreen-card {
+      position: fixed; inset: 12px; z-index: 95; overflow-y: auto;
+      box-shadow: 0 0 0 100vw rgba(4, 6, 11, 0.92);
+    }
+    .card-header {
+      padding: 13px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 700; font-size: 12.5px; letter-spacing: 0.02em;
+      gap: 8px; flex-wrap: wrap; background: var(--header-glass);
+    }
+
+    /* ФИЛЬТРЫ И ПОИСК СКАНЕРА */
+    .filter-bar {
+      padding: 11px 15px; background: rgba(9, 13, 22, 0.6); border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 9px;
+    }
+    .filter-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+    .f-tab {
+      background: rgba(20, 28, 44, 0.6); border: 1px solid var(--border); color: var(--muted);
+      padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.15s;
+    }
+    .f-tab:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.15); }
+    .f-tab.active {
+      background: rgba(56, 189, 248, 0.15); color: var(--cyan);
+      border-color: rgba(56, 189, 248, 0.5); box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+    .search-inp {
+      width: 100%; background: rgba(14, 20, 32, 0.8); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 12px; border-radius: 7px; font-size: 12px; outline: none;
+      transition: all 0.18s;
+    }
+    .search-inp:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(56, 189, 248, 0.25); }
+
+    /* СПИСОК АКЦИЙ СКАНЕРА */
+    .scanner-list { max-height: 1160px; overflow-y: auto; }
+    .s-row {
+      display: grid; grid-template-columns: 38px 108px 86px 1fr;
+      align-items: center; gap: 8px; padding: 11px 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04); cursor: pointer; transition: background 0.12s;
+    }
+    .s-row:hover { background: rgba(255, 255, 255, 0.035); }
+    .s-row.active {
+      background: rgba(0, 240, 118, 0.07);
+      border-left: 3px solid var(--green-bright);
+    }
+
+    .score-ring {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12px;
+      border: 1.5px solid var(--border-2); color: var(--muted); background: var(--panel-2);
+    }
+    .score-ring.high { border-color: var(--green-bright); color: var(--green-bright); background: var(--green-dim); box-shadow: 0 0 10px rgba(0, 240, 118, 0.2); }
+    .score-ring.mid { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+    .t-symbol { font-weight: 700; font-size: 13px; color: #fff; display: flex; align-items: center; gap: 4px; }
+    .t-name { font-size: 11px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .t-price { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 600; color: #fff; }
+
+    .tf-mini-strip { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+    .tf-mini {
+      font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+      padding: 1px 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.04);
+      color: var(--muted); border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .tf-mini.abs-long { background: var(--green-dim); color: var(--green-bright); border-color: rgba(0, 240, 118, 0.4); }
+    .tf-mini.abs-short { background: var(--red-dim); color: var(--red-bright); border-color: rgba(244, 63, 94, 0.4); }
+
+    /* ШАПКА ВЫБРАННОГО ТИКЕРА */
+    .detail-top {
+      padding: 15px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+    }
+    .d-price-big { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; color: #fff; }
+    .verdict-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 11.5px;
+      background: var(--panel-2); border: 1px solid var(--border-2); color: var(--muted);
+    }
+    .verdict-pill.long { background: var(--green-dim); color: var(--green-bright); border-color: rgba(0, 240, 118, 0.45); box-shadow: var(--green-glow); }
+    .verdict-pill.short { background: var(--red-dim); color: var(--red-bright); border-color: rgba(244, 63, 94, 0.45); box-shadow: var(--red-glow); }
+    .verdict-pill.div-short { background: var(--amber-dim); color: #fde68a; border-color: rgba(245, 158, 11, 0.45); }
+
+    /* ГРАФИК */
+    .chart-box { position: relative; width: 100%; height: 500px; background: #070a10; }
+    #mainChart { display: block; width: 100%; height: 100%; cursor: crosshair; }
+
+    /* ПАНЕЛЬ ТАЙМФРЕЙМОВ И СЛОЕВ */
+    .tf-bar {
+      padding: 8px 16px; background: rgba(9, 13, 22, 0.8); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    }
+    .tf-btns, .tool-btns { display: flex; gap: 4px; align-items: center; }
+    .tf-btn, .tool-btn {
+      background: transparent; border: 1px solid transparent; color: var(--muted);
+      padding: 4px 9px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.15s;
+    }
+    .tf-btn:hover, .tool-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .tf-btn.active, .tool-btn.active {
+      background: rgba(56, 189, 248, 0.15); color: var(--cyan);
+      border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 0 8px rgba(56, 189, 248, 0.15);
+    }
+
+    /* УРОВНИ СНАЙПЕРА */
+    .levels-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+    .lvl-card {
+      background: rgba(16, 23, 36, 0.6); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .lvl-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 700; }
+    .lvl-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 800; }
+    .lvl-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+    /* МАТРИЦА CVD */
+    .cvd-matrix-wrap { padding: 13px 18px; border-bottom: 1px solid var(--border); }
+    .sec-subtitle {
+      font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.07em; margin-bottom: 10px; font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;
+    }
+    .cvd-matrix { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .cvd-cell {
+      background: rgba(16, 23, 36, 0.6); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    }
+    .cvd-cell.alert-long { border-color: var(--green-bright); background: rgba(0, 240, 118, 0.08); box-shadow: var(--green-glow); }
+    .cvd-cell.alert-short { border-color: var(--red); background: rgba(244, 63, 94, 0.08); box-shadow: var(--red-glow); }
+
+    /* ДВЕ КОЛОНКИ ДЕТАЛЕЙ */
+    .sub-two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+    .sub-box { background: rgba(16, 23, 36, 0.6); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 11.5px; }
+
+    .factors-box { padding: 13px 18px; }
+    .f-item { font-size: 12px; padding: 3px 0; color: var(--text); }
+    .b-item {
+      font-size: 11.5px; padding: 6px 11px; margin-bottom: 6px; border-radius: 6px;
+      background: var(--amber-dim); color: #fde68a; border: 1px solid rgba(245,158,11,0.3);
+    }
+
+    /* НИЖНИЕ ПАНЕЛИ / ПАЗЛЫ */
+    .bottom-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }
+    .panel-scroll { max-height: 380px; overflow-y: auto; padding: 13px 18px; }
+    
+    .trade-card {
+      background: rgba(18, 25, 38, 0.65); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transition: all 0.18s ease;
+    }
+    .trade-card:hover {
+      background: rgba(24, 33, 50, 0.78); border-color: rgba(56, 189, 248, 0.28);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35); transform: translateY(-1px);
+    }
+
+    .strat-card {
+      background: rgba(18, 25, 38, 0.65); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 13px 15px; margin-bottom: 11px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+    .h-row { padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 11.5px; font-family: 'JetBrains Mono', monospace; }
+
+    /* ВКЛАДКИ ПОЗИЦИЙ */
+    .pos-tabs-wrap {
+      display: inline-flex; background: rgba(8, 12, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 7px;
+      padding: 2px; gap: 2px;
+    }
+    .pos-tab {
+      background: transparent; border: none; color: var(--muted);
+      padding: 4px 11px; border-radius: 5px; font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s ease;
+    }
+    .pos-tab:hover { color: #fff; }
+    .pos-tab.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0.08));
+      border: 1px solid rgba(56, 189, 248, 0.38); color: #38bdf8;
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.15);
+    }
+
+    /* МОДАЛЬНЫЕ ОКНА */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(4, 6, 10, 0.88);
+      backdrop-filter: blur(10px); z-index: 100;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: #0d121c; border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius); width: 840px; max-width: 95vw; max-height: 88vh;
+      overflow-y: auto; padding: 22px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;
+    }
+    .modal-title { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+    .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    .tier-col { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px; }
+    .tier-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 11.5px; }
+
+    /* ЖИВОЙ МАЯК ТОРГОВ */
+    .live-beacon {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: #00f076; box-shadow: 0 0 8px #00f076;
+      animation: beaconPulse 2s infinite ease-in-out;
+    }
+    @keyframes beaconPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    /* РЕЖИМ КОНФИДЕНЦИАЛЬНОСТИ / МАСКИРОВКА СУММ */
+    .privacy-blur {
+      filter: blur(4px) !important;
+      user-select: none !important;
+      position: relative !important;
+      display: inline-block !important;
+    }
+    .privacy-blur::after {
+      content: "*** ₽";
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      color: #94a3b8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      letter-spacing: 2px;
+      border-radius: 4px;
+      z-index: 10;
+    }
+    #kpiPortfolioRub.privacy-blur::after {
+      content: "****** ₽";
+      font-size: 21px;
+    }
+    #kpiPortfolioPnl.privacy-blur::after {
+      content: "PnL: ****** ₽ (***%)";
+      font-size: 11px;
+    }
+    #kpiStratOpenSub.privacy-blur::after {
+      content: "Свободно: ****** ₽ | Занято: ****** ₽";
+      font-size: 10px;
+    }
+
+    /* УПРАВЛЕНИЕ ГОРИЗОНТАЛЬНЫМ УРОВНЕМ ВИДЖЕТОВ (НА ОДИН УРОВЕНЬ / НА ВСЮ ШИРИНУ) */
+    .bottom-grid .card.card-full-width {
+      grid-column: 1 / -1 !important;
+    }
+    .card-tools {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .card-tool-btn {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      transition: all 0.15s ease;
+    }
+    .card-tool-btn:hover {
+      color: #fff;
+      border-color: var(--cyan);
+      background: var(--panel-3);
+    }
+    .card-tool-btn.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      background: rgba(56,189,248,0.12);
+    }
+
+    /* ПАЗЛ-ВИДЖЕТЫ В СТИЛЕ ТЕРМИНАЛА Т-ИНВЕСТИЦИИ */
+    .card[draggable="true"] .card-header {
+      cursor: grab;
+      user-select: none;
+    }
+    .card[draggable="true"] .card-header:active {
+      cursor: grabbing;
+    }
+    .card-drag-handle {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-right: 6px;
+      color: var(--muted);
+      cursor: grab;
+      font-size: 13px;
+      opacity: 0.65;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .card-drag-handle:hover {
+      opacity: 1;
+      color: var(--cyan);
+    }
+    .card.dragging {
+      opacity: 0.45;
+      transform: scale(0.985);
+      border: 2px dashed var(--cyan) !important;
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.25) !important;
+    }
+    .card.drag-over {
+      border: 2px solid var(--green-bright) !important;
+      background: rgba(16, 185, 129, 0.08) !important;
+    }
+    .card.collapsed > *:not(.card-header) {
+      display: none !important;
+    }
+    .layout-reset-btn {
+      background: rgba(56,189,248,0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(56,189,248,0.3);
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .layout-reset-btn:hover {
+      background: var(--cyan);
+      color: #0b0f17;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">◎</div>
+      <div>
+        <div class="brand-title">MOEX<span>//</span>TradingGuru <span class="brand-tag">PRO</span></div>
+        <div class="brand-sub">ИНТЕРАКТИВНЫЙ ТЕРМИНАЛ · ПОТОК ОРДЕРОВ CVD · НОВОСТИ РЫНКА · РИСОВАНИЕ · 3 СЧЕТА СТРАТЕГИЙ</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="pill mono" id="imoexPill">🏛 IMOEX: загрузка...</div>
+      <div class="pill" id="marketStatusPill">🕒 Сессия...</div>
+      <div class="pill mono" id="clockPill">--:--:-- МСК</div>
+      <div class="pill" title="Ключ доступа к терминалу" style="display:inline-flex;align-items:center;gap:4px">
+        🔑 <input type="password" id="webSecretInput" class="secret-input" value="" placeholder="Пароль" onchange="saveWebSecret(this.value)" onkeydown="if(event.key==='Enter')saveWebSecret(this.value)" autocomplete="current-password" style="width:82px" />
+        <span id="btnToggleSecret" onclick="toggleSecretVisibility()" style="cursor:pointer;font-size:12px;opacity:0.75;user-select:none;padding:0 2px" title="Показать/скрыть пароль">👁</span>
+      </div>
+      <button class="btn" onclick="openTiersModal()">🎛 Бумаги (<span id="topActiveCnt">28</span>)</button>
+      <button class="btn btn-purple" onclick="openBacktestModal(60)">🧪 Бэктест 60д</button>
+      <button class="btn" onclick="downloadCvdCsv()">📥 CVD CSV</button>
+      <button class="layout-reset-btn" onclick="resetWidgetLayout()" title="Сбросить расположение виджетов пазла по умолчанию">🧩 Сброс пазла</button>
+                  <button id="btnPrivacyToggle" class="btn" onclick="togglePrivacyMode()" style="background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.3);color:#e2e8f0;font-weight:600" title="Скрыть/показать все денежные суммы (режим конфиденциальности)">👁 Суммы: Видны</button>
+      <button class="btn btn-red" onclick="triggerPanicCloseAll()" style="background:rgba(244,63,94,0.18);border:1px solid #f43f5e;color:#fda4af;font-weight:700" title="🚨 Закрыть ВСЕ позиции по рынку немедленно">🚨 PANIC (Сбросить всё)</button>
+      <button class="btn btn-green" onclick="loadDashboard(true)">⟳ Обновить</button>
+    </div>
+  </header>
+
+  <div class="auth-banner" id="authBanner">
+    🔐 Терминал защищён паролем. Введите ключ доступа в поле 🔑 в правом верхнем углу и нажмите Enter.
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee" id="marqueeStrip">Загрузка котировок Мосбиржи...</div>
+  </div>
+
+  <div class="container">
+    <!-- ВЕРХНИЕ 6 КАРТОЧЕК KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">💼 ПОРТФЕЛЬ ВЛАДЕЛЬЦА</div>
+        <div class="kpi-val" id="kpiPortfolioRub">10 000 000 ₽</div>
+        <div class="kpi-sub mono" id="kpiPortfolioPnl">PnL: +0 ₽ (+0.00%)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">📊 ВИНРЕЙТ (БЕЗ Б/У)</div>
+        <div class="kpi-val" id="kpiWinrate">0.0%</div>
+        <div class="kpi-sub mono" id="kpiWL">0В / 0С</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">👁 ОТКРЫТЫЕ ПОЗИЦИИ</div>
+        <div class="kpi-val" style="color:var(--cyan)" id="kpiActiveCnt">0</div>
+        <div class="kpi-sub" id="kpiStratOpenSub">ручных: 0 | в стратегиях: 0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">📡 СКРЫТЫЙ НАБОР / РАЗДАЧА CVD</div>
+        <div class="kpi-val" style="color:var(--green-bright)" id="kpiInformantCnt">0</div>
+        <div class="kpi-sub">флэт + перевес дельты (5 ТФ)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🎯 СИГНАЛЫ СНАЙПЕРА</div>
+        <div class="kpi-val" style="color:var(--amber)" id="kpiSetupsCnt">0</div>
+        <div class="kpi-sub" id="kpiMinScore">порог входа: 7/10 баллов</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">🐋 РАДАР КРУПНЯКА</div>
+        <div class="kpi-val" style="color:var(--purple)" id="kpiWhalesCnt">0</div>
+        <div class="kpi-sub">принты ≥1 млн ₽, TWAP, айсберги</div>
+      </div>
+    </div>
+
+    <!-- ГЛАВНАЯ СЕТКА -->
+    <div class="main-grid">
+      <!-- ЛЕВАЯ КОЛОНКА: СКАНЕР АКЦИЙ -->
+      <div class="card" id="widgetScanner" data-widget="scanner" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет (как в Т-Инвестициях)">⠿</span> 📡 Сканер бумаг</span>
+          <span class="mono" style="font-size:11px;color:var(--muted)" id="scanTimeLabel">синхронизация...</span>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-tabs">
+            <button class="f-tab active" onclick="setScannerFilter('ALL', this)">Все</button>
+            <button class="f-tab" onclick="setScannerFilter('CVD', this)">📡 Набор/Раздача CVD</button>
+            <button class="f-tab" onclick="setScannerFilter('SNIPER', this)">🎯 Снайпер</button>
+            <button class="f-tab" onclick="setScannerFilter('WHALE', this)">🐋 Крупняк</button>
+            <button class="f-tab" onclick="setScannerFilter('DIV', this)">⚠️ Дивергенции</button>
+            <button class="f-tab" onclick="setScannerFilter('RVOL', this)">🔥 Всплеск RVOL</button>
+          </div>
+          <input type="text" id="scannerSearch" class="search-inp" placeholder="🔎 Поиск по тикеру или названию (SBER, Лукойл...)" oninput="renderScannerList()" />
+        </div>
+        <div class="scanner-list" id="scannerList"></div>
+      </div>
+
+      <!-- ПРАВАЯ КОЛОНКА: ИНТЕРАКТИВНЫЙ ГРАФИК И РАЗБОР -->
+      <div class="card" id="detailCard" data-widget="chart" draggable="true">
+        <div class="detail-top">
+          <div>
+            <div class="d-title"><span class="card-drag-handle" title="Зажмите и перетащите график как виджет" style="font-size:16px">⠿</span>
+              <span id="dName">Сбербанк</span>
+              <span class="d-ticker" id="dTicker">SBER</span>
+              <span class="verdict-pill" id="dVerdict">ЗАГРУЗКА</span>
+              <span id="dShortProposalBadge" style="display:none" class="verdict-pill div-short">⚠️ ДИВЕРГЕНЦИЯ-ПАМП: ШОРТ</span>
+              <span id="dLiveBadge" class="tf-mini">LIVE</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div class="d-price-big" id="dPrice">-- ₽</div><span id="dAtrBadge" class="tf-mini" style="background:rgba(56,189,248,0.12);color:var(--cyan);border-color:rgba(56,189,248,0.35);font-size:11px;padding:3px 8px;font-weight:600">📊 ATR: загрузка...</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+            <button class="btn btn-green" style="padding:7px 16px;font-size:12.5px;letter-spacing:0.02em" onclick="trackSelectedManual('LONG')">🟢 ВЗЯТЬ LONG (BUY)</button>
+            <button class="btn btn-red" style="padding:7px 16px;font-size:12.5px;letter-spacing:0.02em" onclick="trackSelectedManual('SHORT')">🔴 ВЗЯТЬ SHORT (SELL)</button>
+            <button class="btn" style="border-color:var(--purple);color:#d8b4fe" onclick="queueMarketOpenOrder()" title="Автозаход в долю секунды при открытии биржи с контролем гэпа">⏱ На открытии биржи</button>
+            <button class="btn" id="btnUntrackCurrent" style="display:none;border-color:var(--red);color:#fda4af" onclick="untrackSelectedManual()">✕ Закрыть сделку</button>
+            <button class="btn" onclick="toggleFullscreenChart()" title="Развернуть график на весь экран">⛶ Экран</button>
+            <div class="score-ring" id="dScoreRing" style="width:40px;height:40px;font-size:13px">0</div>
+          </div>
+        </div>
+
+        <!-- ПАНЕЛЬ ВХОДА: ВЫБОР % ОТ ДЕПОЗИТА И ПЛЕЧИ T-INVEST -->
+        <div style="padding:9px 18px;background:rgba(15,23,38,0.75);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.04em">🎯 Объём входа:</span>
+            <div style="display:flex;gap:2px;margin-right:2px">
+              <button type="button" class="f-tab active" id="btnModePct" style="padding:2px 7px;font-size:10.5px" onclick="setEntryCalcMode('pct', this)">% Депо</button>
+              <button type="button" class="f-tab" id="btnModeRisk" style="padding:2px 7px;font-size:10.5px" onclick="setEntryCalcMode('risk', this)">🛡 Риск в ₽</button>
+            </div>
+            <div id="pctCalcInputs" style="display:flex;align-items:center;gap:5px">
+              <div style="display:flex;gap:2px">
+                <button type="button" class="f-tab dep-pct-btn" onclick="setEntryDepPct(10, this)">10%</button>
+                <button type="button" class="f-tab dep-pct-btn active" onclick="setEntryDepPct(20, this)">20%</button>
+                <button type="button" class="f-tab dep-pct-btn" onclick="setEntryDepPct(50, this)">50%</button>
+                <button type="button" class="f-tab dep-pct-btn" onclick="setEntryDepPct(100, this)">100%</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:3px;background:var(--panel-2);border:1px solid var(--border);border-radius:6px;padding:2px 7px">
+                <input id="inputDepPct" type="number" min="1" max="100" value="20" oninput="onCustomDepPctInput(this.value)" style="width:40px;background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;text-align:right;outline:none" />
+                <span style="font-size:11px;color:var(--muted);font-weight:600">% депо</span>
+              </div>
+            </div>
+
+            <div id="riskCalcInputs" style="display:none;align-items:center;gap:5px">
+              <span style="font-size:11px;color:var(--amber);font-weight:700">Потеря при SL:</span>
+              <input id="inputRiskRub" type="number" step="1000" min="1000" max="1000000" value="25000" oninput="updateEntryCalcPreview()" style="width:64px;background:var(--panel-2);border:1px solid var(--border);border-radius:5px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;padding:2px 5px;text-align:right;outline:none" />
+              <span style="font-size:11px;color:var(--muted)">₽</span>
+              <div style="display:flex;gap:2px">
+                <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputRiskRub').value='10000';updateEntryCalcPreview()">10k</button>
+                <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputRiskRub').value='25000';updateEntryCalcPreview()">25k</button>
+                <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputRiskRub').value='50000';updateEntryCalcPreview()">50k</button>
+                <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputRiskRub').value='100000';updateEntryCalcPreview()">100k</button>
+              </div>
+            </div>
+            <span style="color:var(--border-2)">|</span>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text);cursor:pointer;user-select:none" title="Использовать официальное маржинальное плечо Тинькофф Инвестиций (T-Invest) для этой бумаги">
+              <input type="checkbox" id="checkUseLeverage" checked onchange="updateEntryCalcPreview()" style="cursor:pointer;accent-color:var(--cyan)" />
+              <span style="font-weight:600">Плечо T-Invest:</span>
+            </label>
+            <span id="badgeTickerLeverage" class="mono" style="font-size:11px;background:rgba(56,189,248,0.1);color:var(--cyan);border:1px solid rgba(56,189,248,0.3);padding:3px 8px;border-radius:5px;font-weight:600">L: -- | S: --</span>
+            <span style="color:var(--border-2)">|</span>
+            <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text);cursor:pointer;user-select:none" title="Автоматически зафиксировать 50% позиции на 55% пути к TP и перенести SL в безубыток">
+              <input type="checkbox" id="checkAutoPartial" checked style="cursor:pointer;accent-color:var(--cyan)" />
+              <span>Автофикс (50% на 55% пути)</span>
+            </label>
+          </div>
+
+          <div id="entryCalcSummary" class="mono" style="font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:14px">
+            <span>Свои (маржа): <b id="entryMarginRub" style="color:#fff">-- ₽</b></span>
+            <span>Позиция в рынке: <b id="entryPowerRub" style="color:var(--green-bright)">-- ₽</b></span>
+          </div>
+        </div>
+
+        <!-- СТРОКА НАСТРОЙКИ TP / SL ПЕРЕД ВХОДОМ В СДЕЛКУ -->
+        <div style="padding:7px 18px;background:rgba(22,30,44,0.65);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.04em">🎯 Уровни перед входом:</span>
+            
+            <div style="display:flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid rgba(0,230,118,0.35);border-radius:6px;padding:3px 8px">
+              <span style="font-size:11px;color:var(--green-bright);font-weight:700">✅ Take-Profit:</span>
+              <input id="inputEntryTp" type="number" step="0.01" placeholder="Авто" oninput="this.dataset.userEdited='1'" style="width:74px;background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;outline:none" />
+              <span style="font-size:10px;color:var(--muted)">₽</span>
+              <button type="button" class="btn" style="padding:1px 5px;font-size:9.5px;color:#fda4af" onclick="document.getElementById('inputEntryTp').value='0';document.getElementById('inputEntryTp').dataset.userEdited='1'" title="Убрать Take-Profit">✕ Без TP</button>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:5px;background:var(--panel-2);border:1px solid rgba(244,63,94,0.35);border-radius:6px;padding:3px 8px">
+              <span style="font-size:11px;color:var(--red);font-weight:700">🛡 Stop-Loss:</span>
+              <input id="inputEntrySl" type="number" step="0.01" placeholder="Авто" oninput="this.dataset.userEdited='1'" style="width:74px;background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;outline:none" />
+              <span style="font-size:10px;color:var(--muted)">₽</span>
+              <button type="button" class="btn" style="padding:1px 5px;font-size:9.5px;color:#fda4af" onclick="document.getElementById('inputEntrySl').value='0';document.getElementById('inputEntrySl').dataset.userEdited='1'" title="Убрать Stop-Loss">✕ Без SL</button>
+            </div>
+
+            <button type="button" class="btn" style="padding:2px 8px;font-size:10.5px" onclick="resetEntryLevelsToAuto()" title="Вернуть расчётные уровни снайпера">⟲ Авто-уровни</button>
+                      <div style="display:flex;align-items:center;gap:6px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);border-radius:6px;padding:3px 8px" title="Максимально допустимый гэп цены открытия от цены закрытия">
+            <span style="font-size:11px;color:#d8b4fe;font-weight:700">⏱ Макс. гэп:</span>
+            <input id="inputMaxGapPct" type="number" step="0.1" min="0" max="20" value="1.0" style="width:40px;background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;text-align:right;outline:none" />
+            <span style="font-size:10px;color:var(--muted)">%</span>
+            <div style="display:flex;gap:2px">
+              <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputMaxGapPct').value='0.5'">0.5%</button>
+              <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputMaxGapPct').value='1.0'">1.0%</button>
+              <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px" onclick="document.getElementById('inputMaxGapPct').value='2.0'">2.0%</button>
+              <button type="button" class="btn" style="padding:1px 4px;font-size:9.5px;color:#fda4af" onclick="document.getElementById('inputMaxGapPct').value='0'">Любой</button>
+            </div>
+          </div>
+
+          </div>
+
+          <div style="font-size:11px;color:var(--muted)">
+            💡 <i>Можно ввести свои цены TP/SL или нажать «✕ Без», чтобы открыть сделку без стопа/тейка.</i>
+          </div>
+        </div>
+
+
+                <!-- СТРОКА КАСКАДА ТЕЙК-ПРОФИТОВ (MULTI-TAKE-PROFIT) -->
+        <div id="multiTpContainer" style="padding:6px 18px;background:rgba(15,23,38,0.7);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--green-bright);font-weight:700">🎯 Каскад тейков:</span>
+            <div id="multiTpList" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"></div>
+            <button type="button" class="btn" style="padding:2px 7px;font-size:10px;color:var(--green-bright);border-color:rgba(0,230,118,0.4)" onclick="addEntryTpLevel()">➕ Добавить TP</button>
+          </div>
+          <span style="font-size:10.5px;color:var(--muted)">💡 Задайте несколько целей: например, TP1 (50% объёма), TP2 (30%), TP3 (20%)</span>
+        </div>
+
+
+        <!-- ПАНЕЛЬ 1: ТАЙМФРЕЙМЫ + МАСШТАБ + СЛОИ -->
+        <div class="tf-bar">
+          <div class="tf-btns">
+            <button class="tf-btn" onclick="changeTF('1m', this)">1м</button>
+            <button class="tf-btn" onclick="changeTF('5m', this)">5м</button>
+            <button class="tf-btn active" onclick="changeTF('15m', this)">15м</button>
+            <button class="tf-btn" onclick="changeTF('30m', this)">30м</button>
+            <button class="tf-btn" onclick="changeTF('1h', this)">1ч</button>
+            <button class="tf-btn" onclick="changeTF('4h', this)">4ч</button>
+            <button class="tf-btn" onclick="changeTF('1d', this)">1д</button>
+            <span style="color:var(--border-2);margin:0 4px">|</span>
+            <button class="tool-btn" onclick="zoomChart(-0.25)" title="Приблизить (Зум +)">➕</button>
+            <button class="tool-btn" onclick="zoomChart(0.25)" title="Отдалить (Зум -)">➖</button>
+            <button class="tool-btn" onclick="resetChartView()" title="Сбросить масштаб к последним свечам">⟲ Сброс вида</button>
+          </div>
+          <div class="tool-btns">
+            <span style="font-size:10.5px;color:var(--muted);margin-right:2px">Слои:</span>
+            <button class="tool-btn layer-btn on" onclick="toggleLayer('ema', this)">EMA</button>
+            <button class="tool-btn layer-btn on" onclick="toggleLayer('poc', this)">POC+Объём</button>
+            <button class="tool-btn layer-btn on" onclick="toggleLayer('tpsl', this)">TP/SL</button>
+            <button class="tool-btn layer-btn on" onclick="toggleLayer('cumd', this)">Кум.Дельта</button>
+          </div>
+        </div>
+
+        <!-- ПАНЕЛЬ 2: ИНСТРУМЕНТЫ РИСОВАНИЯ НА ГРАФИКЕ -->
+        <div class="tf-bar" style="background:rgba(17, 23, 34, 0.55)">
+          <div class="tool-btns">
+            <span style="font-size:10.5px;color:var(--muted);margin-right:4px">✏️ Рисование:</span>
+            <button class="tool-btn active" id="toolPan" onclick="setDrawTool('pan', this)">🖐 Панорама (Двигать)</button>
+            <button class="tool-btn" id="toolLine" onclick="setDrawTool('line', this)">📏 Линия тренда</button>
+            <button class="tool-btn" id="toolHline" onclick="setDrawTool('hline', this)">➖ Гориз. уровень</button>
+            <button class="tool-btn" id="toolRect" onclick="setDrawTool('rect', this)">▭ Зона / Боковик</button>
+            <span style="color:var(--border-2);margin:0 4px">|</span>
+            <div class="color-dot active" style="background:#00e676" onclick="setDrawColor('#00e676', this)" title="Зелёный"></div>
+            <div class="color-dot" style="background:#ff5252" onclick="setDrawColor('#ff5252', this)" title="Красный"></div>
+            <div class="color-dot" style="background:#38bdf8" onclick="setDrawColor('#38bdf8', this)" title="Голубой"></div>
+            <div class="color-dot" style="background:#fbbf24" onclick="setDrawColor('#fbbf24', this)" title="Жёлтый"></div>
+            <div class="color-dot" style="background:#a855f7" onclick="setDrawColor('#a855f7', this)" title="Фиолетовый"></div>
+          </div>
+          <div class="tool-btns">
+            <button class="tool-btn" onclick="undoLastDrawing()" title="Удалить последнюю линию">↩️ Отменить</button>
+            <button class="tool-btn" style="color:#fda4af" onclick="clearTickerDrawings()" title="Удалить все рисунки на этом тикере">🗑 Очистить рисунки</button>
+          </div>
+        </div>
+
+        <!-- ХОЛСТ ГРАФИКА -->
+        <div class="chart-box">
+          <div class="chart-tooltip" id="chartTooltip"></div>
+          <div class="chart-hint" id="chartHint">💡 Колёсико мыши — Зум | Зажать ЛКМ — двигать график влево/вправо</div>
+          <canvas id="mainChart"></canvas>
+        </div>
+
+        <!-- РАСЧЁТНЫЕ УРОВНИ СДЕЛКИ -->
+        <div class="levels-grid">
+          <div class="lvl-card">
+            <div class="lvl-title">🎯 ТОЧКА ВХОДА И ПРИОРИТЕТ</div>
+            <div class="lvl-val" style="color:var(--cyan)" id="lvlEntry">-- ₽</div>
+            <div class="lvl-sub mono" id="lvlRR">R/R --</div>
+          </div>
+          <div class="lvl-card">
+            <div class="lvl-title">✅ TAKE-PROFIT (КАСКАД)</div>
+            <div class="lvl-val" style="color:var(--green-bright)" id="lvlTP">-- ₽</div>
+            <div class="lvl-sub" id="lvlTPReason">50% на полпути ➔ 25% TP ➔ трейлинг</div>
+          </div>
+          <div class="lvl-card">
+            <div class="lvl-title">🛡 STOP-LOSS</div>
+            <div class="lvl-val" style="color:var(--red)" id="lvlSL">-- ₽</div>
+            <div class="lvl-sub" id="lvlSLReason">структурный стоп</div>
+          </div>
+          <div class="lvl-card">
+            <div class="lvl-title">📐 АЛЬТЕРНАТИВНАЯ СТОРОНА</div>
+            <div class="lvl-val mono" style="font-size:12.5px" id="lvlAltSide">--</div>
+            <div class="lvl-sub mono" id="lvlAltTargets">TP -- | SL --</div>
+          </div>
+        </div>
+
+        <!-- МАТРИЦА ИНФОРМАТОРА CVD ПО 5 ТАЙМФРЕЙМАМ -->
+        <div class="cvd-matrix-wrap">
+          <div class="sec-subtitle">
+            <span>📡 ИНФОРМАТОР СКРЫТОГО НАБОРА / РАЗДАЧИ ПО 5 ТАЙМФРЕЙМАМ (ОКНО 6 СВЕЧЕЙ)</span>
+            <span class="mono" id="cvdCoverageBadge" style="font-size:10.5px;color:var(--cyan)">Покрытие лентой: --%</span>
+          </div>
+          <div class="cvd-matrix" id="mtfCvdMatrix"></div>
+        </div>
+
+        <!-- УРОВНИ, СТАКАН И ДЕТЕКТОРЫ КРУПНЯКА -->
+        <div class="sub-two-grid">
+          <div class="sub-box">
+            <div class="sec-subtitle">🧱 УРОВНИ S/R, POC И ВИДИМАЯ ЛИКВИДНОСТЬ В СТАКАНЕ (ТОП-50)</div>
+            <div id="srAndBookBox" class="mono" style="line-height:1.65;font-size:11.5px"></div>
+          </div>
+          <div class="sub-box">
+            <div class="sec-subtitle">🐋 ДЕТЕКТОРЫ КРУПНОГО ИГРОКА, КАРТА MTF EMA И ПОВОДЫРЬ IMOEX</div>
+            <div id="whalesAndMtfBox" class="mono" style="line-height:1.65;font-size:11.5px"></div>
+          </div>
+        </div>
+
+        <!-- ФАКТОРЫ И ПРИЧИНЫ БЛОКИРОВКИ -->
+        <div class="factors-box">
+          <div class="sec-subtitle">📋 ФАКТОРЫ СИГНАЛА И ЭВРИСТИКА МИКРОСТРУКТУРЫ</div>
+          <div id="factorsList"></div>
+          <div class="sec-subtitle" style="margin-top:12px">🛑 ФИЛЬТРЫ СНАЙПЕРА (ПРИЧИНЫ БЛОКИРОВКИ АВТОВХОДА)</div>
+          <div id="blockersList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- НИЖНИЕ 4 ПАНЕЛИ -->
+    <div class="bottom-grid">
+            <div class="card" id="widgetPending" data-widget="pending" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> <span id="pendingTitle">⏱ Отложенные ордера на открытие рынка (0)</span></span>
+          <span class="mono" style="font-size:10.5px;color:#d8b4fe">Автозаход в 1-ю секунду сессии при гэпе ≤ лимита</span>
+        </div>
+        <div class="panel-scroll" id="pendingList"></div>
+      </div>
+
+            <div class="card" id="widgetTracked" data-widget="tracked" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> <span id="trackedTitle">👁 Открытые позиции (0)</span></span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="pos-tabs-wrap">
+              <button class="pos-tab active" id="tabPosManual" onclick="switchPositionsTab('manual', this)">👤 Мои сделки (<span id="cntPosManual">0</span>)</button>
+              <button class="pos-tab" id="tabPosStrat" onclick="switchPositionsTab('strat', this)">🤖 Стратегии (<span id="cntPosStrat">0</span>)</button>
+              <button class="pos-tab" id="tabPosAll" onclick="switchPositionsTab('all', this)">👁 Все (<span id="cntPosAll">0</span>)</button>
+            </div>
+            <button class="btn" style="color:#fda4af;padding:3px 8px;font-size:10.5px" onclick="clearTracked()">🗑 Очистить</button>
+          </div>
+        </div>
+        <div class="panel-scroll" id="trackedList"></div>
+      </div>
+
+      <div class="card" id="widgetStrats" data-widget="strats" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> 💼 Счета стратегий</span>
+          <span class="mono" style="font-size:10.5px;color:var(--muted)">Авто-вход + каскад Б/У + трейлинг</span>
+        </div>
+        <div class="panel-scroll" id="stratsList"></div>
+      </div>
+
+      <div class="card" id="widgetWhales" data-widget="whales" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> <span id="whalesTitle">🐋 События крупняка (0)</span></span>
+          <span class="mono" style="font-size:10px;color:var(--muted)">принты ≥1 млн ₽ · TWAP · минутный импакт · iceberg</span>
+        </div>
+        <div class="panel-scroll" id="whalesList"></div>
+      </div>
+
+      <div class="card" id="widgetHistory" data-widget="history" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> 📜 История сделок (2 дня)</span>
+          <button class="btn" style="color:var(--amber);padding:4px 9px;font-size:10.5px" onclick="resetStats()">🔄 Сбросить статистику</button>
+        </div>
+        <div class="panel-scroll" id="historyList"></div>
+      </div>
+
+            <div class="card" id="widgetHeatmap" data-widget="heatmap" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> 🕒 Тепловая карта часов сессии (MOEX)</span>
+          <span class="mono" style="font-size:10.5px;color:var(--cyan)" id="heatmapPhaseBadge">Фаза: синхронизация</span>
+        </div>
+        <div class="panel-scroll" id="heatmapContent"></div>
+      </div>
+
+            <div class="card" id="widgetDividends" data-widget="dividends" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> 📅 Дивидендный календарь и экспирации (MOEX)</span>
+          <span class="mono" style="font-size:10.5px;color:var(--amber)" id="divCutoffCount">Контроль отсечек</span>
+        </div>
+        <div class="panel-scroll" id="dividendList"></div>
+      </div>
+
+      <div class="card" id="widgetNews" data-widget="news" draggable="true">
+        <div class="card-header">
+          <span style="display:inline-flex;align-items:center"><span class="card-drag-handle" title="Зажмите и перетащите виджет">⠿</span> <span id="newsTitle">📰 Лента новостей рынка</span></span>
+          <span class="mono" style="font-size:10.5px;color:var(--cyan)">прямой поток в реальном времени</span>
+        </div>
+        <div class="panel-scroll" id="newsList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: ВЫБОР БУМАГ 1 / 2 / 3 ЭШЕЛОНА -->
+  <div class="modal-overlay" id="tiersModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">🎛 ВЫБОР БУМАГ ДЛЯ МОНИТОРИНГА (1 / 2 / 3 ЭШЕЛОН)</div>
+        <button class="btn" onclick="closeTiersModal()">✕ Закрыть</button>
+      </div>
+      <p style="color:var(--muted);margin-bottom:12px;font-size:12px">
+        Отмеченные бумаги участвуют в сканере Снайпера, Информаторе CVD (5 ТФ), радаре крупняка 🐋 и портфельном бэктесте. Изменения мгновенно синхронизируются с Telegram-ботом.
+      </p>
+      <div id="tiersModalContent"></div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: ЧЕСТНЫЙ ПОРТФЕЛЬНЫЙ БЭКТЕСТ -->
+  <div class="modal-overlay" id="btModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" id="btModalTitle">🧪 ЧЕСТНЫЙ ПОРТФЕЛЬНЫЙ БЭКТЕСТ ПО ДНЕВНЫМ СВЕЧАМ</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick="openBacktestModal(30)">30 дн.</button>
+          <button class="btn" onclick="openBacktestModal(60)">60 дн.</button>
+          <button class="btn" onclick="openBacktestModal(90)">90 дн.</button>
+          <button class="btn" onclick="closeBtModal()">✕ Закрыть</button>
+        </div>
+      </div>
+      <div id="btModalContent"></div>
+    </div>
+  </div>
+
+<script>
+let selectedTicker = "SBER";
+let currentTF = "15m";
+let scannerFilter = "ALL";
+let dashboardData = null;
+let currentAnalyze = null;
+let currentCandles = [];
+
+// Состояние камеры графика (Панорама и Зум — работают в браузере, 0 МБ нагрузки на сервер)
+let viewState = {
+  ticker: "",
+  tf: "",
+  startIdx: 0,
+  count: 0,
+  userAdjusted: false
+};
+
+// Слои графика
+let chartLayers = {
+  ema: true,
+  poc: true,
+  tpsl: true,
+  cumd: true
+};
+
+// Состояние инструментов рисования
+let drawTool = "pan"; // 'pan' | 'line' | 'hline' | 'rect'
+let drawColor = "#00e676";
+let isDragging = false;
+let dragStartX = 0;
+let dragStartIdx = 0;
+let draftShape = null;
+let hoverCandleIdx = -1;
+let lastChartGeom = null;
+
+
+// =====================================================================
+// ФИЧИ: РЕЖИМ ПРИВАТНОСТИ, PANIC BUTTON, ДИВИДЕНДНЫЙ КАЛЕНДАРЬ
+// =====================================================================
+let isPrivacyMode = localStorage.getItem("moex_privacy_mode") === "1";
+
+function togglePrivacyMode() {
+  isPrivacyMode = !isPrivacyMode;
+  localStorage.setItem("moex_privacy_mode", isPrivacyMode ? "1" : "0");
+  applyPrivacyMode();
+  if (dashboardData) renderDashboard();
+}
+
+function applyPrivacyMode() {
+  const btn = document.getElementById("btnPrivacyToggle");
+  if (btn) {
+    if (isPrivacyMode) {
+      btn.innerHTML = "🙈 Суммы: <b>*** Скрыты</b>";
+      btn.style.background = "rgba(245,158,11,0.18)";
+      btn.style.borderColor = "var(--amber)";
+      btn.style.color = "#fde68a";
+    } else {
+      btn.innerHTML = "👁 Суммы: <b>Видны</b>";
+      btn.style.background = "rgba(148,163,184,0.12)";
+      btn.style.borderColor = "rgba(148,163,184,0.3)";
+      btn.style.color = "#e2e8f0";
+    }
+  }
+
+  const kpiPort = document.getElementById("kpiPortfolioRub");
+  if (kpiPort) kpiPort.classList.toggle("privacy-blur", isPrivacyMode);
+  const kpiPnl = document.getElementById("kpiPortfolioPnl");
+  if (kpiPnl) kpiPnl.classList.toggle("privacy-blur", isPrivacyMode);
+  const kpiStrat = document.getElementById("kpiStratOpenSub");
+  if (kpiStrat) kpiStrat.classList.toggle("privacy-blur", isPrivacyMode);
+
+  const eMargin = document.getElementById("entryMarginRub");
+  if (eMargin) eMargin.classList.toggle("privacy-blur", isPrivacyMode);
+  const ePower = document.getElementById("entryPowerRub");
+  if (ePower) ePower.classList.toggle("privacy-blur", isPrivacyMode);
+
+  document.querySelectorAll(".privacy-sum").forEach(el => {
+    el.classList.toggle("privacy-blur", isPrivacyMode);
+  });
+}
+
+async function triggerPanicCloseAll() {
+  const confirmed = confirm("🚨 ВНИМАНИЕ: Вы действительно хотите немедленно закрыть ВСЕ открытые позиции (ручные и по стратегиям) встречными рыночными ордерами?");
+  if (!confirmed) return;
+  try {
+    const res = await postAction({ action: "panic_close_all" });
+    if (res && res.ok) {
+      alert(`🚨 PANIC CLOSE УСПЕШНО:\n${res.message || "Все открытые позиции закрыты по рынку."}`);
+      await loadDashboard(true);
+    } else {
+      alert(`Ошибка при закрытии: ${(res && res.message) || "неизвестная ошибка"}`);
+    }
+  } catch (err) {
+    alert("Ошибка связи с сервером при экстренном закрытии: " + err);
+  }
+}
+
+function renderDividendWidget(divCalendar) {
+  const el = document.getElementById("dividendList");
+  if (!el) return;
+  if (!divCalendar || !divCalendar.length) {
+    el.innerHTML = `<div style="color:var(--muted);padding:8px">Нет ближайших дивидендных отсечек в базе.</div>`;
+    return;
+  }
+  let highRiskCount = 0;
+  el.innerHTML = divCalendar.map(d => {
+    const isSoon = d.cutoff_soon;
+    if (isSoon) highRiskCount++;
+    const badgeColor = isSoon ? "background:rgba(244,63,94,0.18);border:1px solid #f43f5e;color:#fda4af" : (d.days_left <= 10 ? "background:rgba(245,158,11,0.18);border:1px solid #f59e0b;color:#fde68a" : "background:var(--panel-2);border:1px solid var(--border);color:var(--muted)");
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;margin-bottom:6px;background:var(--panel-2);border:1px solid var(--border);border-radius:6px;font-size:11.5px" class="mono">
+        <div style="display:flex;align-items:center;gap:8px">
+          <b style="color:#fff;font-size:12px;cursor:pointer" onclick="selectStock('${d.ticker}')">${d.ticker}</b>
+          <span style="color:var(--muted)">${d.date} (${d.days_left} дн.)</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--green-bright);font-weight:700">${d.div_rub} ₽ (${d.yield_pct}%)</span>
+          <span style="padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;${badgeColor}">${d.risk}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const badgeEl = document.getElementById("divCutoffCount");
+  if (badgeEl) {
+    badgeEl.innerHTML = highRiskCount > 0 ? `<b style="color:var(--red)">⚠️ Отсечка близко: ${highRiskCount}</b>` : "Все отсечки штатно";
+  }
+}
+
+function getWebSecret() {
+  return localStorage.getItem("moex_web_secret") || "0000";
+}
+function saveWebSecret(val) {
+  const s = (val || "").trim();
+  if (s) {
+    localStorage.setItem("moex_web_secret", s);
+  } else {
+    localStorage.removeItem("moex_web_secret");
+  }
+  loadDashboard(true);
+}
+function toggleSecretVisibility() {
+  const inp = document.getElementById("webSecretInput");
+  const btn = document.getElementById("btnToggleSecret");
+  if (!inp) return;
+  if (inp.type === "password") {
+    inp.type = "text";
+    if (btn) btn.textContent = "🙈";
+  } else {
+    inp.type = "password";
+    if (btn) btn.textContent = "👁";
+  }
+}
+const curSecret = getWebSecret(); if (curSecret) document.getElementById("webSecretInput").value = curSecret;
+
+function apiHeaders(extra = {}) {
+  return Object.assign({ "X-Web-Secret": getWebSecret() }, extra);
+}
+
+// Хранение рисунков в браузере отдельно для каждого тикера
+function getDrawings(ticker) {
+  try {
+    return JSON.parse(localStorage.getItem(`moex_draw_${ticker}`) || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+function saveDrawings(ticker, list) {
+  localStorage.setItem(`moex_draw_${ticker}`, JSON.stringify(list));
+}
+
+function setDrawTool(tool, btn) {
+  drawTool = tool;
+  document.querySelectorAll("#toolPan, #toolLine, #toolHline, #toolRect").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  const cv = document.getElementById("mainChart");
+  if (tool === "pan") {
+    cv.classList.remove("drawing-mode");
+    document.getElementById("chartHint").textContent = "💡 Колёсико мыши — Зум | Зажать ЛКМ — двигать график влево/вправо";
+  } else {
+    cv.classList.add("drawing-mode");
+    document.getElementById("chartHint").textContent =
+      tool === "hline"
+        ? "✏️ Кликните на графике, чтобы поставить горизонтальный уровень цены"
+        : "✏️ Зажмите ЛКМ и протяните на графике, чтобы нарисовать объект";
+  }
+}
+
+function setDrawColor(col, el) {
+  drawColor = col;
+  document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
+  if (el) el.classList.add("active");
+}
+
+function undoLastDrawing() {
+  const list = getDrawings(selectedTicker);
+  if (list.length > 0) {
+    list.pop();
+    saveDrawings(selectedTicker, list);
+    drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+  }
+}
+
+function clearTickerDrawings() {
+  saveDrawings(selectedTicker, []);
+  drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+}
+
+function toggleLayer(key, btn) {
+  chartLayers[key] = !chartLayers[key];
+  btn.classList.toggle("on", chartLayers[key]);
+  drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+}
+
+function toggleFullscreenChart() {
+  document.getElementById("detailCard").classList.toggle("fullscreen-card");
+  setTimeout(() => drawSniperChart(currentAnalyze?.signal || {}, currentCandles), 60);
+}
+
+function resetChartView() {
+  if (!currentCandles.length) return;
+  viewState.count = currentCandles.length;
+  viewState.startIdx = 0;
+  viewState.userAdjusted = false;
+  drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+}
+
+function zoomChart(deltaRatio, anchorRatio = 0.85) {
+  if (!currentCandles.length) return;
+  const total = currentCandles.length;
+  const oldCount = viewState.count || total;
+  const newCount = Math.max(14, Math.min(total, Math.round(oldCount * (1 + deltaRatio))));
+  const anchorCandle = viewState.startIdx + oldCount * anchorRatio;
+  let newStart = Math.round(anchorCandle - newCount * anchorRatio);
+  newStart = Math.max(0, Math.min(total - newCount, newStart));
+  viewState.count = newCount;
+  viewState.startIdx = newStart;
+  viewState.userAdjusted = true;
+  drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+}
+
+function formatLotsDelta(val) {
+  const v = Number(val || 0);
+  const abs = Math.abs(v);
+  const sign = v < 0 ? "-" : (v > 0 ? "+" : "");
+  if (abs >= 1e6) return `${sign}${(abs / 1e6).toFixed(2)} млн лот.`;
+  if (abs >= 1e3) return `${sign}${(abs / 1e3).toFixed(1)} тыс. лот.`;
+  return `${sign}${Math.round(abs)} лот.`;
+}
+
+function formatRub(val) {
+  const v = Math.abs(Number(val || 0));
+  let str = `${Math.round(v)} ₽`;
+  if (v >= 1e9) str = `${(v / 1e9).toFixed(2)} млрд ₽`;
+  else if (v >= 1e6) str = `${(v / 1e6).toFixed(2)} млн ₽`;
+  else if (v >= 1e3) str = `${(v / 1e3).toFixed(1)} тыс. ₽`;
+  return `<span class="privacy-sum ${isPrivacyMode ? 'privacy-blur' : ''}">${str}</span>`;
+}
+
+async function loadDashboard(force = false) {
+  try {
+    const secret = getWebSecret() || "0000";
+    const token = encodeURIComponent(secret);
+    const res = await fetch(`/api/dashboard?token=${token}${force ? '&force=1' : ''}`, {
+      headers: apiHeaders()
+    });
+    if (res.status === 401) {
+      const banner = document.getElementById("authBanner");
+      if (banner) {
+        banner.style.display = "block";
+        banner.innerHTML = "🔐 Неверный ключ доступа (`401 Unauthorized`). Введите правильный пароль в поле 🔑 в правом верхнем углу.";
+      }
+      return;
+    }
+    document.getElementById("authBanner").style.display = "none";
+    dashboardData = await res.json();
+    renderDashboard();
+    await loadTickerDetails(selectedTicker, currentTF);
+  } catch (e) {
+    console.error("Ошибка загрузки /api/dashboard:", e);
+    const strip = document.getElementById("marqueeStrip");
+    if (strip && strip.innerHTML.includes("Загрузка котировок")) {
+      strip.innerHTML = `<span style="color:var(--amber)">⏳ Ожидание подключения к серверу бота... Нажмите «⟳ Обновить»</span>`;
+    }
+  }
+}
+
+async function loadTickerDetails(ticker, tf) {
+  try {
+    const token = encodeURIComponent(getWebSecret());
+    const res = await fetch(`/api/analyze?ticker=${encodeURIComponent(ticker)}&tf=${encodeURIComponent(tf)}&token=${token}`, {
+      headers: apiHeaders()
+    });
+    if (res.status === 401) return;
+    const data = await res.json();
+    currentAnalyze = data;
+    const newCandles = data.candles || [];
+
+    // Если сменился тикер или ТФ — показываем весь график; иначе сохраняем текущий зум пользователя
+    if (viewState.ticker !== ticker || viewState.tf !== tf || !viewState.userAdjusted) {
+      viewState.ticker = ticker;
+      viewState.tf = tf;
+      viewState.count = newCandles.length;
+      viewState.startIdx = 0;
+      viewState.userAdjusted = false;
+    } else {
+      viewState.startIdx = Math.max(0, Math.min(newCandles.length - viewState.count, viewState.startIdx));
+    }
+
+    currentCandles = newCandles;
+    renderSelectedDetail();
+  } catch (e) {
+    console.error("Ошибка анализа тикера:", e);
+  }
+}
+
+function setScannerFilter(f, btn) {
+  scannerFilter = f;
+  document.querySelectorAll(".f-tab").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderScannerList();
+}
+
+function hasCvdAlert(s) {
+  const m = s.mtf_cvd || {};
+  return Object.values(m).some(c => c && (c.absorption_side || c.pressure_side));
+}
+
+function renderDashboard() {
+  if (!dashboardData) return;
+
+  document.getElementById("clockPill").textContent = `🕒 ${dashboardData.server_time}`;
+  document.getElementById("topActiveCnt").textContent = dashboardData.active_count || (dashboardData.stocks || []).length;
+
+  const mOpen = dashboardData.market_open;
+  document.getElementById("marketStatusPill").innerHTML = mOpen
+    ? `<span style="display:inline-flex;align-items:center;gap:6px;color:var(--green-bright);font-weight:700"><span class="live-beacon"></span> ТОРГИ ИДУТ</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:6px;color:var(--amber);font-weight:600">🌙 Пауза сессии</span>`;
+
+  if (dashboardData.imoex) {
+    const im = dashboardData.imoex;
+    const col = im.change_pct >= 0 ? "var(--green-bright)" : "var(--red)";
+    const sign = im.change_pct >= 0 ? "+" : "";
+    document.getElementById("imoexPill").innerHTML =
+      `<span style="cursor:pointer" onclick="selectStock('IMOEX')">🏛 IMOEX <b>${im.price.toFixed(1)}</b> <span style="color:${col}">${sign}${im.change_pct.toFixed(2)}%</span> · ${im.summary_badge}</span>`;
+  }
+
+  const st = dashboardData.stats || {};
+  const dep = Number(dashboardData.deposit_rub || 10000000);
+  const netPct = Number(st.net_pct || 0);
+  const portVal = dep * (1 + netPct / 100);
+  const portPnl = portVal - dep;
+
+  document.getElementById("kpiPortfolioRub").textContent = `${Math.round(portVal).toLocaleString('ru-RU')} ₽`;
+  const pnlEl = document.getElementById("kpiPortfolioPnl");
+  pnlEl.textContent = `PnL: ${portPnl >= 0 ? '+' : ''}${Math.round(portPnl).toLocaleString('ru-RU')} ₽ (${netPct >= 0 ? '+' : ''}${netPct.toFixed(2)}%)`;
+  pnlEl.style.color = netPct >= 0 ? "var(--green-bright)" : "var(--red)";
+
+  document.getElementById("kpiWinrate").textContent = `${st.winrate || 0}%`;
+  document.getElementById("kpiWL").textContent = `${st.wins || 0}В / ${st.losses || 0}С`;
+
+  const allTracked = dashboardData.tracked || [];
+  const manualTracked = allTracked.filter(t => !t.strategy);
+  const stratTracked = allTracked.filter(t => t.strategy);
+
+  document.getElementById("kpiActiveCnt").textContent = manualTracked.length;
+  const mSum = dashboardData.margin_summary || {};
+  if (mSum.free_margin_rub !== undefined) {
+    document.getElementById("kpiStratOpenSub").innerHTML = `Свободно: <b>${Math.round(mSum.free_margin_rub).toLocaleString('ru-RU')} ₽</b> (${100 - mSum.margin_level_pct}%)<br/><span style="color:var(--muted)">Занято: ${Math.round(mSum.used_margin_rub).toLocaleString('ru-RU')} ₽ | В рынке: ~${Math.round(mSum.used_buying_power_rub).toLocaleString('ru-RU')} ₽</span>`;
+  } else {
+    document.getElementById("kpiStratOpenSub").textContent = `ручных: ${manualTracked.length} | в стратегиях: ${stratTracked.length}`;
+  }
+
+  const stocks = dashboardData.stocks || [];
+  const cvdAlertsCnt = stocks.filter(s => hasCvdAlert(s)).length;
+  const sniperSetupsCnt = stocks.filter(s => s.verdict === "LONG" || s.verdict === "SHORT").length;
+  const whales = dashboardData.whales || [];
+
+  document.getElementById("kpiInformantCnt").textContent = cvdAlertsCnt;
+  document.getElementById("kpiSetupsCnt").textContent = sniperSetupsCnt;
+  document.getElementById("kpiMinScore").textContent = `порог входа: ${dashboardData.min_score || 7}/10 баллов`;
+  document.getElementById("kpiWhalesCnt").textContent = whales.length;
+  document.getElementById("scanTimeLabel").textContent = `обновлено ${dashboardData.server_time}`;
+
+  const mHtml = stocks.filter(s => s.price > 0).map(s => {
+    const col = s.change >= 0 ? "var(--green-bright)" : "var(--red)";
+    const sign = s.change >= 0 ? "+" : "";
+    return `<span class="m-item" onclick="selectStock('${s.ticker}')"><b style="color:#fff">${s.ticker}</b> ${s.price} ₽ <span style="color:${col}">${sign}${(s.change || 0).toFixed(2)}%</span></span>`;
+  }).join("");
+  if (mHtml) {
+    document.getElementById("marqueeStrip").innerHTML = mHtml + mHtml;
+  } else if (stocks.length > 0) {
+    const fallbackMHtml = stocks.map(s => `<span class="m-item" onclick="selectStock('${s.ticker}')"><b style="color:#fff">${s.ticker}</b> <span style="color:var(--muted)">опрос...</span></span>`).join("");
+    document.getElementById("marqueeStrip").innerHTML = fallbackMHtml + fallbackMHtml;
+  } else {
+    document.getElementById("marqueeStrip").innerHTML = `<span style="color:var(--amber)">⏳ Подключение к шлюзу Мосбиржи T-Invest API...</span>`;
+  }
+
+  renderScannerList();
+  renderBottomPanels(manualTracked, whales, st.history || [], dashboardData.news || []);
+}
+
+function renderScannerList() {
+  if (!dashboardData) return;
+  const stocks = dashboardData.stocks || [];
+  const q = (document.getElementById("scannerSearch").value || "").trim().toUpperCase();
+
+  const filtered = stocks.filter(s => {
+    if (q && !s.ticker.toUpperCase().includes(q) && !(s.name || "").toUpperCase().includes(q)) return false;
+    if (scannerFilter === "CVD") return hasCvdAlert(s);
+    if (scannerFilter === "SNIPER") return s.verdict === "LONG" || s.verdict === "SHORT";
+    if (scannerFilter === "WHALE") return (s.whale_kinds && s.whale_kinds.length > 0) || (s.robots && s.robots.length > 0);
+    if (scannerFilter === "DIV") return s.short_proposal || (s.cvd_data && (s.cvd_data.pivot_bearish_div || s.cvd_data.pivot_bullish_div));
+    return true;
+  });
+
+  document.getElementById("scannerList").innerHTML = filtered.map(s => {
+    const isSel = s.ticker === selectedTicker ? "active" : "";
+    const absSc = Math.abs(s.score || 0);
+    const ringCls = (s.verdict === "LONG" || s.verdict === "SHORT") ? "high" : (absSc >= 5 ? "mid" : "");
+    const col = (s.change || 0) >= 0 ? "var(--green-bright)" : "var(--red)";
+    const sign = (s.change || 0) >= 0 ? "+" : "";
+
+    let vBadge = `<span class="verdict-pill">ВНЕ РЫНКА</span>`;
+    if (s.short_proposal) vBadge = `<span class="verdict-pill div-short">⚠️ ДИВЕР-ШОРТ</span>`;
+    else if (s.verdict === "LONG") vBadge = `<span class="verdict-pill long">🟢 LONG</span>`;
+    else if (s.verdict === "SHORT") vBadge = `<span class="verdict-pill short">🔴 SHORT</span>`;
+
+    const mtfCvd = s.mtf_cvd || {};
+    const tfStrip = ["5m", "15m", "30m", "1h", "4h"].map(tfk => {
+      const ci = mtfCvd[tfk];
+      if (!ci) return "";
+      const side = ci.absorption_side || ci.pressure_side;
+      const cls = side === "LONG" ? "abs-long" : (side === "SHORT" ? "abs-short" : "");
+      const eff = Math.round(ci.delta_efficiency_6 || 0);
+      const fire = side ? "🔥" : "";
+      return `<span class="tf-mini ${cls}">${tfk}:${eff > 0 ? '+' : ''}${eff}%${fire}</span>`;
+    }).join("");
+
+    const whaleCount = (s.whale_kinds || []).length;
+    const whaleTag = whaleCount >= 2 ? `<span title="${(s.whale_kinds || []).join(', ')}">🐋🐋</span>` : (whaleCount === 1 ? `<span title="${(s.whale_kinds || []).join(', ')}">🐋</span>` : "");
+
+    return `
+      <div class="s-row ${isSel}" onclick="selectStock('${s.ticker}')">
+        <div class="score-ring ${ringCls}">${absSc}</div>
+        <div>
+          <span class="t-symbol">${s.ticker} ${whaleTag}${(s.leverage_long && s.leverage_long > 1.05) ? `<span class="tf-mini mono" style="font-size:9.5px;color:var(--cyan);border-color:rgba(56,189,248,0.3);margin-left:4px" title="Плечо T-Invest: Лонг ${s.leverage_long}x, Шорт ${s.leverage_short || 1}x">${s.leverage_long}x</span>` : ""}</span>
+          <span class="t-name">${s.name}</span>
+        </div>
+        <div>
+          <div class="t-price">${s.price ? s.price + ' ₽' : '...'}</div>
+          <div class="mono" style="font-size:10.5px;color:${col}">${sign}${(s.change || 0).toFixed(2)}%</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
+            ${vBadge}
+            <span class="mono" style="font-size:10px;color:var(--muted)">${s.calc_side || ''}</span>
+          </div>
+          <div class="tf-mini-strip">${tfStrip}</div>
+        </div>
+      </div>
+    `;
+  }).join("") || `<div style="padding:18px;color:var(--muted)">Нет бумаг по выбранному фильтру.</div>`;
+}
+
+
+// =====================================================================
+// ТЕПЛОВАЯ КАРТА ЭФФЕКТИВНОСТИ ПО ЧАСАМ ТОРГОВОЙ СЕССИИ (№5)
+// =====================================================================
+function renderSessionHeatmap(hist) {
+  const el = document.getElementById("heatmapContent");
+  const badge = document.getElementById("heatmapPhaseBadge");
+  if (!el || !badge) return;
+
+  const now = new Date();
+  const curH = now.getHours();
+  const curM = now.getMinutes();
+  const curTotalMin = curH * 60 + curM;
+
+  const phases = [
+    { name: "Утренний старт", time: "06:55–09:50", start: 6*60+55, end: 9*60+50, vol: "⚡ Высокая", desc: "Утренняя сессия, переоценка ночного фона, гэпы", col: "var(--cyan)" },
+    { name: "Основной импульс", time: "10:00–12:00", start: 10*60, end: 12*60, vol: "🔥 Максимальная", desc: "Главный объём дня, входы институционалов (лучшее время!)", col: "var(--green-bright)" },
+    { name: "Дневной боковик", time: "12:00–14:00", start: 12*60, end: 14*60, vol: "😴 Низкая", desc: "Спад объёма, затишье (осторожно: ложные распилы)", col: "var(--muted)" },
+    { name: "Ожидание / Вечерний набор", time: "14:00–16:30", start: 14*60, end: 16*60+30, vol: "⚡ Средняя", desc: "Подготовка к вечернему импульсу", col: "var(--amber)" },
+    { name: "Финал основной сессии", time: "16:30–18:50", start: 16*60+30, end: 18*60+50, vol: "🔥 Высокая", desc: "Фиксация позиций перед клирингом, сильные пробои", col: "var(--green-bright)" },
+    { name: "Вечерняя сессия", time: "19:00–23:50", start: 19*60, end: 23*60+50, vol: "⚠️ Тонкий рынок", desc: "Ритейл-торги, пониженная плотность стаканов", col: "var(--purple)" },
+  ];
+
+  let activePhaseName = "🌙 Вне сессии";
+  phases.forEach(p => {
+    if (curTotalMin >= p.start && curTotalMin <= p.end) {
+      activePhaseName = p.name;
+    }
+  });
+  badge.textContent = `Фаза: ${activePhaseName}`;
+
+  el.innerHTML = phases.map(p => {
+    const isNow = curTotalMin >= p.start && curTotalMin <= p.end;
+    const nowTag = isNow ? `<span class="tf-mini" style="background:var(--green-dim);color:var(--green-bright);border-color:var(--green);font-weight:700">СЕЙЧАС</span>` : ``;
+    return `
+      <div class="trade-card" style="padding:9px 12px;margin-bottom:7px;border-color:${isNow ? 'var(--green-bright)' : 'var(--border)'};background:${isNow ? 'rgba(16,185,129,0.06)' : 'var(--panel-2)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:6px">
+            <b style="color:#fff;font-size:12px">${p.name}</b>
+            <span class="mono" style="font-size:11px;color:var(--muted)">(${p.time})</span>
+            ${nowTag}
+          </div>
+          <span style="font-size:11px;color:${p.col};font-weight:700">${p.vol}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${p.desc}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+
+// =====================================================================
+// УПРАВЛЕНИЕ ВКЛАДКАМИ ПОЗИЦИЙ (МОИ СДЕЛКИ / СТРАТЕГИИ / ВСЕ)
+// =====================================================================
+let currentPosTab = 'manual';
+
+function switchPositionsTab(mode, btn) {
+  currentPosTab = mode;
+  document.querySelectorAll(".pos-tab").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  renderPositionsList();
+}
+
+function renderPositionsList() {
+  const allTracked = (dashboardData && dashboardData.tracked) || [];
+  const manualTracked = allTracked.filter(t => !t.strategy);
+  const stratTracked = allTracked.filter(t => t.strategy);
+
+  const cntM = document.getElementById("cntPosManual");
+  if (cntM) cntM.textContent = manualTracked.length;
+  const cntS = document.getElementById("cntPosStrat");
+  if (cntS) cntS.textContent = stratTracked.length;
+  const cntA = document.getElementById("cntPosAll");
+  if (cntA) cntA.textContent = allTracked.length;
+
+  let displayTracked = manualTracked;
+  if (currentPosTab === 'strat') displayTracked = stratTracked;
+  else if (currentPosTab === 'all') displayTracked = allTracked;
+
+  const titleEl = document.getElementById("trackedTitle");
+  if (titleEl) {
+    const label = currentPosTab === 'manual' ? 'Мои сделки' : (currentPosTab === 'strat' ? 'Сделки стратегий' : 'Все открытые сделки');
+    titleEl.textContent = `👁 ${label} (${displayTracked.length})`;
+  }
+
+  const listEl = document.getElementById("trackedList");
+  if (!listEl) return;
+
+  if (!displayTracked.length) {
+    const emptyNote = currentPosTab === 'manual'
+      ? 'Нет открытых ручных сделок. Нажмите «🟢 Взять LONG» или «🔴 Взять SHORT» на выбранной акции, либо переключитесь на вкладку «🤖 Стратегии».'
+      : (currentPosTab === 'strat'
+        ? 'Нет активных позиций по алгоритмическим стратегиям.'
+        : 'Нет открытых позиций.');
+    listEl.innerHTML = `<div style="color:var(--muted);padding:18px;text-align:center;font-size:12px">${emptyNote}</div>`;
+    return;
+  }
+
+  listEl.innerHTML = displayTracked.map(t => {
+    const stratTag = t.strategy ? `<span class="tf-mini" style="background:rgba(192,132,252,0.18);color:#d8b4fe;border-color:rgba(192,132,252,0.4);margin-left:4px">${t.strategy === 'cvd_flow' ? '💧 Поток CVD' : (t.strategy === 'divergence' ? '⚠️ Дивергенция' : '📰 Новости')}</span>` : '';
+    const col = t.pnl_pct >= 0 ? "var(--green-bright)" : "var(--red)";
+    const sign = t.pnl_pct >= 0 ? "+" : "";
+    let stageBadge = `<span class="tf-mini">Ждёт 55% пути</span>`;
+    if (t.tp_trailed) {
+      stageBadge = `<span class="tf-mini abs-long">🎯 Трейлинг (${Math.round((t.remaining_frac || 0.25)*100)}% ост. · стоп ${(t.trail_stop || 0).toFixed(2)} ₽)</span>`;
+    } else if (t.partial_taken || t.is_be) {
+      stageBadge = `<span class="tf-mini" style="color:var(--cyan);border-color:var(--cyan)">🛡 50% фикс · В безубытке</span>`;
+    }
+    const posRub = Number(t.real_amount_rub || t.amount_rub || 0);
+    const pnlRub = posRub > 0 ? Math.round(posRub * (t.pnl_pct || 0) / 100) : 0;
+    const lev = Number(t.leverage || 1.0);
+    const levTag = lev > 1.05 ? ` | Плечо T-Invest: <b>${lev.toFixed(1)}x</b>` : "";
+    const depTag = t.dep_pct ? ` | Депо: <b>${t.dep_pct}%</b>` : "";
+
+    return `
+      <div class="trade-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div onclick="selectStock('${t.ticker}')" style="cursor:pointer">
+            <b style="font-size:13px">${t.name} (${t.ticker})</b> · <span style="color:${t.side === 'LONG' ? 'var(--green-bright)' : 'var(--red)'};font-weight:700">${t.side}</span>
+            ${stageBadge} ${stratTag}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <b class="mono" style="color:${col};font-size:13px">${sign}${t.pnl_pct}% ${lev > 1.05 ? `(${sign}${(t.pnl_pct * lev).toFixed(2)}% на маржу) ` : ""}${posRub > 0 ? `(<span class="privacy-sum ${isPrivacyMode ? 'privacy-blur':''}">${pnlRub >= 0 ? '+' : ''}${pnlRub.toLocaleString('ru-RU')} ₽</span>)` : ""}</b>
+            <button class="btn" style="padding:2px 7px;font-size:10px;color:#fda4af" onclick="${t.strategy ? `untrackStrat('${t.strategy}', '${t.ticker}')` : `untrackTicker('${t.ticker}')`}">✕</button>
+          </div>
+        </div>
+        <div class="mono" style="font-size:11px;color:var(--muted);margin-top:5px">
+          Вход: <b>${t.entry} ₽</b> | Тек: <b>${t.current_price} ₽</b> | TP: <b>${t.tp} ₽</b> | SL: <b>${t.sl} ₽</b>
+          ${(t.take_profits && t.take_profits.length) ? `<div style="margin-top:3px;color:var(--cyan)">🎯 Каскад TP: ${t.take_profits.map((tp, i) => `TP${i+1}: <b>${tp.price} ₽</b> (${tp.pct}%) ${tp.hit ? '✅' : '⏳'}`).join(' · ')}</div>` : ''}
+          ${t.lots ? ` | Лотов: ${t.lots} (~${posRub.toLocaleString('ru-RU')} ₽)` : ""}${levTag}${depTag}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:3px">
+            <span style="font-size:10.5px;color:var(--muted)">✂ Сократить:</span>
+            <button class="btn" style="padding:2px 6px;font-size:10px" onclick="reducePosition('${t.ticker}', 25)">25%</button>
+            <button class="btn" style="padding:2px 6px;font-size:10px" onclick="reducePosition('${t.ticker}', 50)">50%</button>
+            <button class="btn" style="padding:2px 6px;font-size:10px" onclick="reducePosition('${t.ticker}', 75)">75%</button>
+          </div>
+          <button class="btn" style="padding:2px 7px;font-size:10px;color:var(--cyan);border-color:rgba(56,189,248,0.4)" onclick="setBreakeven('${t.ticker}')" title="Перенести Stop Loss на цену входа (безубыток)">🛡 В Б/У</button>
+          <button class="btn btn-green" style="padding:3px 9px;font-size:10.5px;font-weight:700" onclick="toggleEditLevels('${t.ticker}')" title="Изменить, подтянуть или убрать TP и SL">✏ Изменить / Убрать TP и SL</button>
+          <button class="btn" style="padding:2px 7px;font-size:10px;color:#fda4af;border-color:rgba(244,63,94,0.4);margin-left:auto" onclick="${t.strategy ? `untrackStrat('${t.strategy}', '${t.ticker}')` : `untrackTicker('${t.ticker}')`}">✕ Закрыть</button>
+        </div>
+        <div id="editLevelsBox_${t.ticker}" style="display:none;margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px" class="mono">
+            <span>TP: <input id="editTp_${t.ticker}" type="number" step="0.01" value="${t.tp || 0}" style="width:72px;background:var(--panel-2);border:1px solid var(--border);color:#fff;padding:2px 5px;border-radius:4px" /> ₽</span>
+            <button type="button" class="btn" style="padding:1px 5px;font-size:9.5px;color:#fda4af" onclick="document.getElementById('editTp_${t.ticker}').value='0'" title="Убрать Take-Profit">✕ Убрать TP</button>
+            <span>SL: <input id="editSl_${t.ticker}" type="number" step="0.01" value="${t.sl || 0}" style="width:72px;background:var(--panel-2);border:1px solid var(--border);color:#fff;padding:2px 5px;border-radius:4px" /> ₽</span>
+            <button type="button" class="btn" style="padding:1px 5px;font-size:9.5px;color:#fda4af" onclick="document.getElementById('editSl_${t.ticker}').value='0'" title="Убрать Stop-Loss">✕ Убрать SL</button>
+            <label style="display:flex;align-items:center;gap:3px;cursor:pointer">
+              <input type="checkbox" id="editAutoPart_${t.ticker}" ${t.auto_partial_enabled !== false ? 'checked' : ''} style="cursor:pointer;accent-color:var(--cyan)" />
+              <span>Автофикс:</span>
+            </label>
+            <span><input id="editPartTake_${t.ticker}" type="number" min="0" max="90" value="${t.auto_partial_enabled === false ? 0 : (t.partial_take_pct || 50)}" style="width:40px;background:var(--panel-2);border:1px solid var(--border);color:#fff;padding:2px 5px;border-radius:4px" />%</span>
+            <span>при <input id="editPartTrig_${t.ticker}" type="number" min="10" max="90" value="${t.partial_trigger_pct || 55}" style="width:40px;background:var(--panel-2);border:1px solid var(--border);color:#fff;padding:2px 5px;border-radius:4px" />% пути</span>
+            <button class="btn btn-green" style="padding:2px 8px;font-size:10.5px" onclick="saveLevels('${t.ticker}')">💾 Сохранить</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderBottomPanels(manualTracked, whales, hist, news = []) {
+  renderPendingOrdersList(dashboardData ? (dashboardData.pending_orders || []) : []);
+  renderSessionHeatmap(hist);
+  renderPositionsList();
+
+  const strats = (dashboardData && dashboardData.strats) || [];
+  document.getElementById("stratsList").innerHTML = strats.length ? strats.map(st => {
+    const pCol = st.pnl_rub >= 0 ? "var(--green-bright)" : "var(--red)";
+    const pSign = st.pnl_rub >= 0 ? "+" : "";
+    const pct = ((st.compound_mult - 1) * 100).toFixed(2);
+    const openRows = (st.open || []).map(o => {
+      const oCol = o.pnl_pct >= 0 ? "var(--green-bright)" : "var(--red)";
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 9px;background:var(--bg);border-radius:6px;margin-top:5px;font-size:11px" class="mono">
+          <span onclick="selectStock('${o.ticker}')" style="cursor:pointer"><b>${o.ticker}</b> ${o.side} @ ${o.entry} ➔ ${o.current_price} ₽ ${o.tp_trailed ? '🎯трейл' : (o.partial_taken ? '🛡Б/У' : '')}</span>
+          <span>
+            <b style="color:${oCol}">${o.pnl_pct >= 0 ? '+' : ''}${o.pnl_pct}%</b>
+            <button class="btn" style="padding:1px 6px;font-size:9.5px;margin-left:6px;color:#fda4af" onclick="untrackStrat('${st.key}', '${o.ticker}')">✕</button>
+          </span>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="strat-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>${st.name}</b>
+          <span class="mono" style="color:${pCol};font-weight:700"><span class="privacy-sum ${isPrivacyMode ? 'privacy-blur':''}">${st.portfolio_rub.toLocaleString('ru-RU')} ₽</span> (<span class="privacy-sum ${isPrivacyMode ? 'privacy-blur':''}">${pSign}${st.pnl_rub.toLocaleString('ru-RU')} ₽</span> / ${pSign}${pct}%)</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${st.desc}</div>
+        <div class="mono" style="font-size:11px;margin-top:5px;color:var(--text)">
+          Винрейт: <b>${st.winrate}%</b> (${st.wins}В / ${st.losses}С / ${st.be}Б) | Открыто: <b>${(st.open || []).length}/${st.max_positions}</b>
+        </div>
+        ${openRows}
+      </div>
+    `;
+  }).join("") : `<div style="color:var(--muted)">Счета стратегий загружаются...</div>`;
+
+  document.getElementById("whalesTitle").textContent = `🐋 Свежие события крупняка по ленте и стаканам (${whales.length})`;
+  document.getElementById("whalesList").innerHTML = whales.length ? whales.map(w => `
+    <div class="trade-card" onclick="selectStock('${w.ticker}')" style="cursor:pointer">
+      <div style="display:flex;justify-content:space-between">
+        <b>${w.name} (${w.ticker})</b>
+        <span class="mono">${w.price.toFixed(2)} ₽ (${w.change >= 0 ? '+' : ''}${w.change.toFixed(2)}%)</span>
+      </div>
+      ${(w.events || []).map(ev => `<div style="font-size:11.5px;color:var(--text);margin-top:4px">• ${ev}</div>`).join("")}
+    </div>
+  `).join("") : `<div style="color:var(--muted)">За последние 5 минут крупных принтов, TWAP, минутного давления и айсбергов не обнаружено.</div>`;
+
+  document.getElementById("historyList").innerHTML = hist.length
+    ? hist.map((h, i) => {
+        const isWin = h.includes("✅") || h.includes("+");
+        const isLoss = h.includes("🛡") || h.includes("-");
+        const isBe = h.includes("🤝") || h.includes("безубыток") || h.includes("Б/У");
+        const color = isWin ? "var(--green-bright)" : (isLoss ? "var(--red)" : (isBe ? "var(--cyan)" : "var(--text)"));
+        return `<div class="h-row" style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--muted);min-width:24px">${i + 1}.</span>
+          <span style="color:${color};font-weight:600;flex:1">${h}</span>
+        </div>`;
+      }).join("")
+    : `<div style="color:var(--muted)">За последние 2 дня завершённых сделок пока нет.</div>`;
+
+  const nList = news || (dashboardData && dashboardData.news) || [];
+  const newsEl = document.getElementById("newsList");
+  if (newsEl) {
+    document.getElementById("newsTitle").textContent = `📰 Лента новостей рынка (${nList.length})`;
+    newsEl.innerHTML = nList.length ? nList.map(n => {
+      const srcBadge = n.source === "MOEX" 
+        ? `<span class="tf-mini" style="background:rgba(56,189,248,0.12);color:var(--cyan);border-color:rgba(56,189,248,0.35)">MOEX Биржа</span>`
+        : `<span class="tf-mini" style="background:rgba(245,158,11,0.12);color:var(--amber);border-color:rgba(245,158,11,0.35)">РБК</span>`;
+      const critBadge = n.important ? `<span class="tf-mini div-short" style="margin-left:4px">⚠️ ВАЖНО / АУКЦИОН</span>` : ``;
+      return `
+        <div class="trade-card" style="padding:9px 11px;margin-bottom:7px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+            <div style="display:flex;align-items:center;gap:5px">
+              ${srcBadge}
+              ${critBadge}
+            </div>
+            <span class="mono" style="font-size:10.5px;color:var(--muted)">${n.time || ''} ${n.date || ''}</span>
+          </div>
+          <div style="margin-top:6px;font-size:12px;line-height:1.45;color:#fff">
+            ${n.url ? `<a href="${n.url}" target="_blank" rel="noopener" style="color:#fff;text-decoration:none;transition:color 0.15s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#fff'">${n.title}</a>` : n.title}
+          </div>
+        </div>
+      `;
+    }).join("") : `<div style="color:var(--muted)">Загрузка свежих новостей рынка...</div>`;
+  }
+}
+
+
+
+// =====================================================================
+// КАСКАДНЫЕ ТЕЙК-ПРОФИТЫ (MULTI-TAKE-PROFIT С ДОЛЯМИ ФИКСАЦИИ)
+// =====================================================================
+let entryTakeProfits = [
+  { price: 0, pct: 50 },
+  { price: 0, pct: 30 },
+  { price: 0, pct: 20 }
+];
+
+function renderEntryTpList() {
+  const el = document.getElementById("multiTpList");
+  if (!el) return;
+  el.innerHTML = entryTakeProfits.map((item, idx) => `
+    <div style="display:flex;align-items:center;gap:3px;background:var(--panel-2);border:1px solid rgba(0,230,118,0.3);border-radius:6px;padding:2px 6px;font-size:11px" class="mono">
+      <b style="color:var(--green-bright)">TP${idx + 1}:</b>
+      <input type="number" step="0.01" value="${item.price > 0 ? item.price : ''}" placeholder="Цена" oninput="entryTakeProfits[${idx}].price = parseFloat(this.value)||0" style="width:68px;background:transparent;border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;outline:none" />
+      <span style="color:var(--muted)">₽ (</span>
+      <input type="number" min="1" max="100" value="${item.pct}" oninput="entryTakeProfits[${idx}].pct = parseFloat(this.value)||0" style="width:34px;background:transparent;border:none;color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;outline:none;text-align:right" />
+      <span style="color:var(--muted)">%)</span>
+      ${entryTakeProfits.length > 1 ? `<span onclick="removeEntryTpLevel(${idx})" style="cursor:pointer;color:#fda4af;margin-left:2px;font-size:10px" title="Удалить этот TP">✕</span>` : ''}
+    </div>
+  `).join("");
+}
+
+function addEntryTpLevel() {
+  const lastP = entryTakeProfits.length ? entryTakeProfits[entryTakeProfits.length - 1].price : 0;
+  const nextP = lastP > 0 ? +(lastP * 1.015).toFixed(2) : 0;
+  entryTakeProfits.push({ price: nextP, pct: 20 });
+  renderEntryTpList();
+}
+
+function removeEntryTpLevel(idx) {
+  if (entryTakeProfits.length > 1) {
+    entryTakeProfits.splice(idx, 1);
+    renderEntryTpList();
+  }
+}
+
+function resetEntryLevelsToAuto() {
+  const s = (currentAnalyze && currentAnalyze.signal) || (dashboardData && (dashboardData.stocks || []).find(x => x.ticker === selectedTicker));
+  if (!s) return;
+  const t = (s.targets_by_side && s.targets_by_side[s.calc_side || "LONG"]) || {};
+  const tp = t.tp || s.tp || 0;
+  const sl = t.sl || s.sl || 0;
+  const inpTp = document.getElementById("inputEntryTp");
+  const inpSl = document.getElementById("inputEntrySl");
+  if (inpTp) {
+    delete inpTp.dataset.userEdited;
+    inpTp.value = tp > 0 ? Number(tp).toFixed(2) : "";
+  }
+  if (inpSl) {
+    delete inpSl.dataset.userEdited;
+    inpSl.value = sl > 0 ? Number(sl).toFixed(2) : "";
+  }
+}
+
+function renderSelectedDetail() {
+  const s = (currentAnalyze && currentAnalyze.signal) || (dashboardData && (dashboardData.stocks || []).find(x => x.ticker === selectedTicker));
+  if (!s) return;
+
+  document.getElementById("dName").textContent = s.name || selectedTicker;
+  document.getElementById("dTicker").textContent = s.ticker || selectedTicker;
+
+  const vEl = document.getElementById("dVerdict");
+  if (s.verdict === "LONG") {
+    vEl.textContent = "🟢 СИГНАЛ СНАЙПЕРА: LONG";
+    vEl.className = "verdict-pill long";
+  } else if (s.verdict === "SHORT") {
+    vEl.textContent = "🔴 СИГНАЛ СНАЙПЕРА: SHORT";
+    vEl.className = "verdict-pill short";
+  } else {
+    vEl.textContent = `⏸ НАБЛЮДЕНИЕ (ПРИОРИТЕТ ${s.calc_side || 'LONG'})`;
+    vEl.className = "verdict-pill";
+  }
+
+  document.getElementById("dShortProposalBadge").style.display = s.short_proposal ? "inline-block" : "none";
+
+  const liveEl = document.getElementById("dLiveBadge");
+  if (s.is_live_market) {
+    liveEl.textContent = "🟢 LIVE ДАННЫЕ";
+    liveEl.style.color = "var(--green-bright)";
+  } else {
+    liveEl.textContent = "🌙 АРХИВ / ПАУЗА";
+    liveEl.style.color = "var(--amber)";
+  }
+
+  const isTracked = (dashboardData?.tracked || []).some(t => t.ticker === s.ticker && !t.strategy);
+  document.getElementById("btnUntrackCurrent").style.display = isTracked ? "inline-flex" : "none";
+
+  const col = (s.change || 0) >= 0 ? "var(--green-bright)" : "var(--red)";
+  const sign = (s.change || 0) >= 0 ? "+" : "";
+  document.getElementById("dPrice").innerHTML = `${s.price} ₽ <span style="font-size:13.5px;color:${col}">${sign}${(s.change || 0).toFixed(2)}%</span>`;
+
+  const absSc = Math.abs(s.score || 0);
+  const ring = document.getElementById("dScoreRing");
+  ring.textContent = absSc;
+  ring.className = "score-ring " + ((s.verdict === "LONG" || s.verdict === "SHORT") ? "high" : (absSc >= 5 ? "mid" : ""));
+
+  
+  const atrBadge = document.getElementById("dAtrBadge");
+  if (atrBadge) {
+    const atrVal = Number(s.atr || (s.price ? s.price * 0.015 : 0));
+    const atrPct = Number(s.atr_pct || 1.5);
+    const dayRng = Number(s.day_range_pct || 0);
+    const atrCons = Number(s.atr_consumed_pct || 0);
+
+    let atrColor = "var(--cyan)";
+    let atrBg = "rgba(56,189,248,0.12)";
+    let note = "";
+    if (atrCons >= 120) {
+      atrColor = "var(--amber)";
+      atrBg = "rgba(245,158,11,0.15)";
+      note = " ⚠️ (импульс/памп)";
+    }
+
+    atrBadge.style.color = atrColor;
+    atrBadge.style.background = atrBg;
+    atrBadge.style.borderColor = atrColor;
+    atrBadge.innerHTML = `📊 ATR(14): <b>${atrVal.toFixed(2)} ₽</b> (${atrPct.toFixed(2)}%) | Ход дня: <b>${dayRng.toFixed(2)}%</b> (${atrCons.toFixed(0)}% ATR)${note}`;
+  }
+
+  document.getElementById("lvlEntry").textContent = `${s.entry} ₽ (${s.calc_side})`;
+  updateEntryCalcPreview();
+  document.getElementById("lvlRR").textContent = `R/R 1:${s.rr_ratio} · стоп -${(s.risk_pct || 0).toFixed(2)}%`;
+  document.getElementById("lvlTP").textContent = `${s.tp} ₽ (+${(s.profit_pct || 0).toFixed(2)}%)`;
+  document.getElementById("lvlTPReason").textContent = s.tp_reason || "по ATR и R/R 1:1.9";
+  document.getElementById("lvlSL").textContent = `${s.sl} ₽ (-${(s.risk_pct || 0).toFixed(2)}%)`;
+  document.getElementById("lvlSLReason").textContent = s.sl_reason || "за локальный экстремум + ATR";
+
+  const altSide = s.calc_side === "LONG" ? "SHORT" : "LONG";
+  const altT = (s.targets_by_side || {})[altSide] || {};
+  document.getElementById("lvlAltSide").textContent = `План для ${altSide} (R/R 1:${altT.rr_ratio || 1.9})`;
+  document.getElementById("lvlAltTargets").textContent = `TP: ${altT.tp || '—'} ₽ | SL: ${altT.sl || '—'} ₽`;
+
+  const mtfCvd = s.mtf_cvd || {};
+  const curCov = currentAnalyze?.tape_cov_pct ?? s.cvd_data?.tape_cov_pct ?? 0;
+  const isEst = currentAnalyze?.cvd_estimated;
+  document.getElementById("cvdCoverageBadge").innerHTML = isEst
+    ? `<span style="color:var(--amber)">⚠️ Покрытие текущего ТФ лентой: ${curCov}% (CVD частично оценочный)</span>`
+    : `<span style="color:var(--green-bright)">✅ Покрытие текущего ТФ реальной лентой: ${curCov}%</span>`;
+
+  document.getElementById("mtfCvdMatrix").innerHTML = ["5m", "15m", "30m", "1h", "4h"].map(tfk => {
+    const ci = mtfCvd[tfk] || {};
+    const side = ci.absorption_side || ci.pressure_side;
+    const cls = side === "LONG" ? "alert-long" : (side === "SHORT" ? "alert-short" : "");
+    const eff = Number(ci.delta_efficiency_6 || 0);
+    const thr = Number(ci.threshold_pct || 25);
+    const lots = formatLotsDelta(ci.cum_delta_change_6 || 0);
+    const drift = Number(ci.price_change_6_pct || 0);
+    const cov = Number(ci.tape_cov_pct || 0);
+    let badge = `<span style="color:var(--muted)">⚪ Баланс</span>`;
+    if (ci.absorption_side === "LONG") badge = `<span style="color:var(--green-bright);font-weight:700">🟢 Скрытый набор</span>`;
+    else if (ci.absorption_side === "SHORT") badge = `<span style="color:var(--red);font-weight:700">🔴 Скрытая раздача</span>`;
+    else if (ci.pressure_side) badge = `<span style="color:var(--amber);font-weight:700">🐋 Давление CVD</span>`;
+
+    return `
+      <div class="cvd-cell ${cls}">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <b>ТФ ${tfk}</b>
+          ${badge}
+        </div>
+        <div>CVD (6 св.): <b>${lots}</b></div>
+        <div>Перевес: <b style="color:${eff >= 0 ? 'var(--green-bright)' : 'var(--red)'}">${eff >= 0 ? '+' : ''}${eff.toFixed(1)}%</b> <span style="color:var(--muted)">(порог &gt;${thr}%)</span></div>
+        <div style="color:var(--muted);font-size:10px;margin-top:3px">
+          Дрейф цены: ${drift >= 0 ? '+' : ''}${drift.toFixed(2)}% | Лента: ${cov.toFixed(0)}%
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const sr = s.sr_levels || {};
+  const bk = s.book_liquidity || {};
+  const cvd = s.cvd_data || {};
+  
+  // СКАЛЬПЕРСКИЙ СТАКАН ТОП-20 С ПОДСВЕТКОЙ ПЛОТНОСТЕЙ КРУПНЯКА (№3)
+  const bids = bk.top_bids || [];
+  const asks = bk.top_asks || [];
+  const maxLot = Math.max(...bids.map(b=>b.quantity||0), ...asks.map(a=>a.quantity||0), 100);
+
+  let bookLadderHtml = "";
+  if (asks.length || bids.length) {
+    const askRows = asks.slice(0, 5).reverse().map(a => {
+      const barW = Math.min(100, Math.round((a.quantity / maxLot) * 100));
+      const isWall = (a.rub >= 8000000) || (bk.ask_wall_price && Math.abs(a.price - bk.ask_wall_price) < 0.01);
+      const isIce = (s.icebergs || []).some(ic => Math.abs(a.price - ic.price) < 0.02);
+      const iceTag = isIce ? `<span class="tf-mini" style="background:rgba(56,189,248,0.25);color:#bae6fd;border-color:#38bdf8;font-size:9.5px;font-weight:700">🧊 АЙСБЕРГ</span>` : "";
+      const wallTag = isWall ? `<span class="tf-mini" style="background:rgba(244,63,94,0.25);color:#fecdd3;border-color:var(--red);font-size:9.5px;font-weight:700">🐋 ПЛИТА ${formatRub(a.rub)}</span>` : "";
+      return `
+        <div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:2px 6px;margin:1px 0;font-size:11px;border-radius:4px;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${barW}%;background:rgba(244,63,94,0.18);z-index:0"></div>
+          <span style="position:relative;z-index:1;color:#fda4af;font-weight:700">${a.price.toFixed(2)} ₽</span>
+          <span style="position:relative;z-index:1;color:var(--text);display:flex;align-items:center;gap:5px">${iceTag} ${wallTag} <span>${formatLotsDelta(a.quantity).replace('+','')}</span></span>
+        </div>
+      `;
+    }).join("");
+
+    const bidRows = bids.slice(0, 5).map(b => {
+      const barW = Math.min(100, Math.round((b.quantity / maxLot) * 100));
+      const isWall = (b.rub >= 8000000) || (bk.bid_wall_price && Math.abs(b.price - bk.bid_wall_price) < 0.01);
+      const isIce = (s.icebergs || []).some(ic => Math.abs(b.price - ic.price) < 0.02);
+      const iceTag = isIce ? `<span class="tf-mini" style="background:rgba(56,189,248,0.25);color:#bae6fd;border-color:#38bdf8;font-size:9.5px;font-weight:700">🧊 АЙСБЕРГ</span>` : "";
+      const wallTag = isWall ? `<span class="tf-mini" style="background:rgba(16,185,129,0.25);color:#a7f3d0;border-color:var(--green);font-size:9.5px;font-weight:700">🐋 ПЛИТА ${formatRub(b.rub)}</span>` : "";
+      return `
+        <div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:2px 6px;margin:1px 0;font-size:11px;border-radius:4px;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:${barW}%;background:rgba(16,185,129,0.18);z-index:0"></div>
+          <span style="position:relative;z-index:1;color:var(--green-bright);font-weight:700">${b.price.toFixed(2)} ₽</span>
+          <span style="position:relative;z-index:1;color:var(--text);display:flex;align-items:center;gap:5px">${iceTag} ${wallTag} <span>${formatLotsDelta(b.quantity).replace('+','')}</span></span>
+        </div>
+      `;
+    }).join("");
+
+    bookLadderHtml = `
+      <div style="margin:8px 0;padding:6px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px;display:flex;justify-content:space-between">
+          <span>📊 Скальперский стакан глубин</span>
+          <span style="color:var(--cyan)">Баланс Bid: ${bk.bid_share_pct ?? 50}%</span>
+        </div>
+        <div>${askRows}</div>
+        <div style="text-align:center;padding:2px 0;font-size:10.5px;color:var(--muted);border-top:1px dashed var(--border);border-bottom:1px dashed var(--border);margin:2px 0">
+          Спред · Тек. цена: <b style="color:#fff">${s.price || '--'} ₽</b>
+        </div>
+        <div>${bidRows}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById("srAndBookBox").innerHTML = `
+    <div>🔴 Сопротивление: <b>${sr.res1_price || '—'} ₽</b> (+${sr.res1_dist_pct || 0}% · ${sr.res1_label || ''}) ${sr.res2_price ? `| след: <b>${sr.res2_price} ₽</b>` : ''}</div>
+    <div>🟢 Поддержка: <b>${sr.sup1_price || '—'} ₽</b> (-${sr.sup1_dist_pct || 0}% · ${sr.sup1_label || ''}) ${sr.sup2_price ? `| след: <b>${sr.sup2_price} ₽</b>` : ''}</div>
+    ${bookLadderHtml}
+    <div>🟡 POC (макс. объём): <b style="color:#ffeb3b">${sr.poc || '—'} ₽</b> | VWAP: <b>${s.vwap ? s.vwap.toFixed(2) : '—'} ₽</b></div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:6px 0"/>
+    <div>📚 <b>Плита Ask (продавец):</b> ${bk.ask_wall_str || s.ask_wall_str || 'не найдено'}</div>
+    <div>📚 <b>Плита Bid (покупатель):</b> ${bk.bid_wall_str || s.bid_wall_str || 'не найдено'}</div>
+    <div>⚖️ Доля Bid в топ-50 стакана: <b>${bk.bid_share_pct ?? 50}%</b> | CVD с начала дня: <b>${formatLotsDelta(cvd.cvd_today || 0)}</b></div>
+    ${(s.icebergs && s.icebergs.length) ? `
+      <div style="margin-top:5px;padding:6px 8px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.35);border-radius:6px;color:#bae6fd">
+        🧊 <b>Скрытый Айсберг-ордер:</b> ${s.icebergs.map(ic => `<b>${ic.side}</b> на <b>${ic.price} ₽</b> (вид. ${formatLots(ic.visible_qty)} · факт. ~<b>${formatLots(ic.est_hidden_qty)}</b> лот. / <b>${formatRub(ic.est_total_rub)}</b> · ${ic.multiple}×)`).join(' | ')}
+      </div>
+    ` : ''}
+    ${s.dividend_info ? `
+      <div style="margin-top:5px;padding:6px 8px;background:${s.dividend_info.cutoff_soon ? 'rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.4);color:#fca5a5' : 'rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fde68a'};border-radius:6px">
+        📅 <b>Дивидендный контроль:</b> ${s.dividend_info.warning}
+      </div>
+    ` : ''}
+    ${cvd.pivot_div_note ? `<div style="color:var(--amber);margin-top:4px">⚠️ <b>Пивот-дивергенция:</b> ${cvd.pivot_div_note}</div>` : ''}
+  `;
+
+  const bp = s.big_prints || {};
+  const mp = s.minute_pressure || {};
+  const tw = s.big_twap || {};
+  const ra = s.robot_activity || {};
+  const tm = s.tape_metrics || {};
+  const mtf = s.mtf_emas || {};
+  const mtfStr = ["5m", "15m", "30m", "1h", "4h", "1d"].filter(k => mtf[k]).map(k => `<b>${k}:</b> ${mtf[k].badge}`).join(" | ");
+
+  const whaleLines = [];
+  if (bp.detected) whaleLines.push(`🐋 <b>Крупные принты:</b> ${bp.big_count} сд. (${bp.side}) нетто <b>${formatRub(bp.net_rub)}</b> (доля окна ${bp.share_of_window_rub}%)`);
+  if (mp.detected) whaleLines.push(`⏱ <b>Минутное давление:</b> ${mp.side} нетто <b>${formatRub(mp.net_rub)}</b> при сдвиге цены ${mp.move_pct}%`);
+  if (tw.detected) whaleLines.push(`⏲ <b>TWAP-серия:</b> ${tw.count}×${tw.qty} лот. (${tw.side}) на <b>${formatRub(tw.total_rub)}</b> (CV ${tw.interval_cv})`);
+  if (ra.pattern_detected) whaleLines.push(`🔁 <b>Повторы в ленте:</b> ${ra.trade_count}×${ra.quantity_lots} лот. (${ra.side}), интервал ~${ra.median_interval_seconds}с`);
+  if (tm.detected_size) whaleLines.push(`📏 <b>Рост ср. чека:</b> ${formatRub(tm.avg_trade_rub)} (${tm.avg_trend_pct >= 0 ? '+' : ''}${tm.avg_trend_pct}%)`);
+  if (tm.detected_accel) whaleLines.push(`🚀 <b>Ускорение крупных принтов:</b> x${tm.rate_accel} (${tm.big_rate_per_min}/мин)`);
+  if (!whaleLines.length) whaleLines.push(`<span style="color:var(--muted)">• В текущем 5-минутном окне аномальных кластеров крупняка не выявлено</span>`);
+
+  document.getElementById("whalesAndMtfBox").innerHTML = `
+    ${whaleLines.map(l => `<div>${l}</div>`).join("")}
+    <hr style="border:none;border-top:1px solid var(--border);margin:6px 0"/>
+    <div>📈 <b>Тренд EMA по ТФ:</b> ${mtfStr || 'загрузка...'}</div>
+    <div style="margin-top:3px">EMA9: <b>${(s.ema9 || 0).toFixed(2)}</b> | EMA20: <b>${(s.ema20 || 0).toFixed(2)}</b> | EMA50: <b>${(s.ema50 || 0).toFixed(2)}</b> | EMA200: <b>${(s.ema200 || 0).toFixed(2)}</b></div>
+  `;
+
+  const fList = (s.factors || []).concat((s.robots || []).map(r => `🤖 <b>${r.type}:</b> ${r.detail || r.desc || ''}`));
+  document.getElementById("factorsList").innerHTML = fList.length
+    ? fList.map(f => `<div class="f-item">• ${f}</div>`).join("")
+    : `<div class="f-item">• Факторы рассчитываются...</div>`;
+
+  const bList = s.block_reasons || [];
+  document.getElementById("blockersList").innerHTML = bList.length
+    ? bList.map(b => `<div class="b-item">⚠️ ${b}</div>`).join("")
+    : `<div style="color:var(--green-bright);font-weight:700">✅ Все снайперские фильтры пройдены — ограничений для входа нет!</div>`;
+
+  drawSniperChart(s, currentCandles);
+}
+
+// =====================================================================
+// ДВИЖОК ИНТЕРАКТИВНОГО ГРАФИКА (ПАНОРАМА + ЗУМ + РИСОВАНИЕ)
+// =====================================================================
+function drawSniperChart(s, allCandles) {
+  const canvas = document.getElementById("mainChart");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width, H = rect.height;
+  ctx.fillStyle = "#0d121b";
+  ctx.fillRect(0, 0, W, H);
+
+  if (!allCandles || !allCandles.length || !s) {
+    ctx.fillStyle = "#8b9bb4";
+    ctx.font = "13px Inter";
+    ctx.fillText("Загрузка свечей, профиля объёма POC и ленты CVD из T-Invest API...", W / 2 - 210, H / 2);
+    return;
+  }
+
+  // Определяем видимое окно свечей с учётом зума и панорамы
+  const total = allCandles.length;
+  const count = Math.max(10, Math.min(total, viewState.count || total));
+  const startIdx = Math.max(0, Math.min(total - count, viewState.startIdx || 0));
+  const candles = allCandles.slice(startIdx, startIdx + count);
+
+  const padL = 64, padR = 78, padT = 22, padB = 28;
+  const priceH = (H - padT - padB) * 0.68;
+  const cvdTop = padT + priceH + 16;
+  const cvdH = (H - padT - padB) - priceH - 16;
+  const plotW = W - padL - padR;
+
+  const extraPrices = chartLayers.tpsl ? [s.sl || 0, s.tp || 0] : [];
+  const lows = candles.map(c => c.low).concat(extraPrices).filter(v => v > 0);
+  const highs = candles.map(c => c.high).concat(extraPrices).filter(v => v > 0);
+  const minP = Math.min(...lows) * 0.9985;
+  const maxP = Math.max(...highs) * 1.0015;
+  const pToY = p => padT + priceH - ((p - minP) / Math.max(maxP - minP, 1e-6)) * priceH;
+  const yToP = y => maxP - ((y - padT) / priceH) * (maxP - minP);
+
+  const step = plotW / candles.length;
+  const cw = Math.max(2, step * 0.64);
+
+  lastChartGeom = { padL, padR, padT, padB, priceH, cvdTop, cvdH, plotW, minP, maxP, pToY, yToP, step, startIdx, count, total };
+
+  // Сетка цены
+  ctx.strokeStyle = "#172131";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (priceH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    const val = (maxP - ((maxP - minP) / 4) * i).toFixed(2);
+    ctx.fillStyle = "#697b92"; ctx.font = "10px JetBrains Mono";
+    ctx.fillText(val, W - padR + 6, y + 3);
+  }
+
+  // Вертикальные разделители новых торговых дней
+  for (let i = 1; i < candles.length; i++) {
+    const dPrev = (candles[i - 1].time || "").split(" ")[0];
+    const dCur = (candles[i].time || "").split(" ")[0];
+    if (dCur && dPrev && dCur !== dPrev) {
+      const x = padL + i * step;
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.32)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, cvdTop + cvdH); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#38bdf8"; ctx.font = "bold 9.5px JetBrains Mono";
+      ctx.fillText(dCur, x + 4, padT + 11);
+    }
+  }
+
+  // Слой: Горизонтальный профиль объёма + POC
+  if (chartLayers.poc) {
+    const bins = 26;
+    const binVol = new Array(bins).fill(0);
+    const binNet = new Array(bins).fill(0);
+    candles.forEach(c => {
+      const idx = Math.min(bins - 1, Math.max(0, Math.floor(((c.close - minP) / Math.max(maxP - minP, 1e-6)) * bins)));
+      binVol[idx] += c.vol;
+      binNet[idx] += (c.delta || 0);
+    });
+    const maxBinV = Math.max(...binVol, 1);
+    const pocIdx = binVol.indexOf(maxBinV);
+    const pocPrice = s.sr_levels?.poc || (minP + ((pocIdx + 0.5) / bins) * (maxP - minP));
+
+    for (let b = 0; b < bins; b++) {
+      const bw = (binVol[b] / maxBinV) * (plotW * 0.24);
+      const by = padT + priceH - ((b + 1) / bins) * priceH;
+      const bh = (priceH / bins) * 0.84;
+      if (b === pocIdx) ctx.fillStyle = "rgba(250, 204, 21, 0.42)";
+      else ctx.fillStyle = binNet[b] >= 0 ? "rgba(16, 185, 129, 0.20)" : "rgba(244, 63, 94, 0.20)";
+      ctx.fillRect(padL, by, bw, bh);
+    }
+
+    if (pocPrice >= minP && pocPrice <= maxP) {
+      const pocY = pToY(pocPrice);
+      ctx.strokeStyle = "#facc15"; ctx.lineWidth = 1.3; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(padL, pocY); ctx.lineTo(W - padR, pocY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#facc15"; ctx.font = "bold 10px JetBrains Mono";
+      ctx.fillText(`POC ${Number(pocPrice).toFixed(2)}`, padL + 4, pocY - 4);
+    }
+  }
+
+  // Уровни сопротивления и поддержки
+  const sr = s.sr_levels || {};
+  if (sr.res1_price && sr.res1_price >= minP && sr.res1_price <= maxP) {
+    const rY = pToY(sr.res1_price);
+    ctx.strokeStyle = "rgba(244, 63, 94, 0.65)"; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(padL, rY); ctx.lineTo(W - padR, rY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#fda4af"; ctx.fillText(`Сопр ${sr.res1_price}`, padL + plotW * 0.66, rY - 4);
+  }
+  if (sr.sup1_price && sr.sup1_price >= minP && sr.sup1_price <= maxP) {
+    const sY = pToY(sr.sup1_price);
+    ctx.strokeStyle = "rgba(16, 185, 129, 0.65)"; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(padL, sY); ctx.lineTo(W - padR, sY); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#6ee7b7"; ctx.fillText(`Подд ${sr.sup1_price}`, padL + plotW * 0.66, sY + 11);
+  }
+
+  // Японские свечи
+  candles.forEach((c, i) => {
+    const x = padL + i * step + step / 2;
+    const isUp = c.close >= c.open;
+    const col = isUp ? "#10b981" : "#f43f5e";
+    ctx.strokeStyle = col;
+    ctx.fillStyle = col;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, pToY(c.high)); ctx.lineTo(x, pToY(c.low)); ctx.stroke();
+    const topY = pToY(Math.max(c.open, c.close));
+    const botY = pToY(Math.min(c.open, c.close));
+    ctx.fillRect(x - cw / 2, topY, cw, Math.max(1.5, botY - topY));
+  });
+
+  // Слой: Линии EMA 20 / 50 / 200
+  if (chartLayers.ema) {
+    const drawLine = (key, color, dashed = false) => {
+      ctx.strokeStyle = color; ctx.lineWidth = 1.4;
+      if (dashed) ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      candles.forEach((c, i) => {
+        const x = padL + i * step + step / 2;
+        const y = pToY(c[key]);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke(); ctx.setLineDash([]);
+    };
+    drawLine("ema20", "#38bdf8");
+    drawLine("ema50", "#f59e0b");
+    drawLine("ema200", "#cbd5e1", true);
+  }
+
+  // Слой: Зоны Входа / TP / SL
+  if (chartLayers.tpsl && s.entry && s.tp && s.sl) {
+    const eY = pToY(s.entry), tpY = pToY(s.tp), slY = pToY(s.sl);
+    ctx.fillStyle = "rgba(16, 185, 129, 0.06)"; ctx.fillRect(padL, Math.min(eY, tpY), plotW, Math.abs(eY - tpY));
+    ctx.fillStyle = "rgba(244, 63, 94, 0.06)"; ctx.fillRect(padL, Math.min(eY, slY), plotW, Math.abs(eY - slY));
+
+    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(padL, eY); ctx.lineTo(W - padR, eY); ctx.stroke();
+    ctx.strokeStyle = "#00e676"; ctx.lineWidth = 1.3; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(padL, tpY); ctx.lineTo(W - padR, tpY); ctx.stroke();
+    ctx.strokeStyle = "#f43f5e"; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(padL, slY); ctx.lineTo(W - padR, slY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.font = "bold 9.5px JetBrains Mono";
+    ctx.fillStyle = "#38bdf8"; ctx.fillText(`ВХОД ${s.entry}`, W - padR + 4, eY + 3);
+    ctx.fillStyle = "#00e676"; ctx.fillText(`TP ${s.tp}`, W - padR + 4, tpY + 3);
+    ctx.fillStyle = "#f43f5e"; ctx.fillText(`SL ${s.sl}`, W - padR + 4, slY + 3);
+  }
+
+  // Слой: Кумулятивная дельта (свеча+лента и чистая лента)
+  if (chartLayers.cumd) {
+    const cumVals = candles.map(c => c.cum_delta || 0).concat(candles.map(c => c.tape_cum_delta || 0));
+    const minCum = Math.min(...cumVals, 0), maxCum = Math.max(...cumVals, 1);
+    const cumToY = v => padT + priceH - ((v - minCum) / Math.max(maxCum - minCum, 1e-6)) * priceH;
+
+    ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 1.8; ctx.beginPath();
+    candles.forEach((c, i) => {
+      const x = padL + i * step + step / 2;
+      const y = cumToY(c.cum_delta || 0);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.strokeStyle = "#facc15"; ctx.lineWidth = 1.15; ctx.setLineDash([4, 3]); ctx.beginPath();
+    candles.forEach((c, i) => {
+      const x = padL + i * step + step / 2;
+      const y = cumToY(c.tape_cum_delta || 0);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Отрисовка пользовательских рисунков (Уровни, Линии тренда, Зоны)
+  const savedShapes = getDrawings(selectedTicker);
+  const allShapes = draftShape ? savedShapes.concat([draftShape]) : savedShapes;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(padL, padT, plotW, priceH);
+  ctx.clip();
+
+  allShapes.forEach(sh => {
+    ctx.strokeStyle = sh.color || "#00e676";
+    ctx.fillStyle = sh.color || "#00e676";
+    ctx.lineWidth = 1.8;
+
+    if (sh.type === "hline") {
+      const y = pToY(sh.p1);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      ctx.font = "bold 10px JetBrains Mono";
+      ctx.fillText(`✏️ ${Number(sh.p1).toFixed(2)}`, W - padR - 68, y - 4);
+    } else if (sh.type === "line") {
+      const x1 = padL + (sh.i1 - startIdx) * step + step / 2;
+      const y1 = pToY(sh.p1);
+      const x2 = padL + (sh.i2 - startIdx) * step + step / 2;
+      const y2 = pToY(sh.p2);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x1, y1, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x2, y2, 3, 0, Math.PI * 2); ctx.fill();
+    } else if (sh.type === "rect") {
+      const x1 = padL + (sh.i1 - startIdx) * step + step / 2;
+      const y1 = pToY(sh.p1);
+      const x2 = padL + (sh.i2 - startIdx) * step + step / 2;
+      const y2 = pToY(sh.p2);
+      ctx.globalAlpha = 0.16;
+      ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+      ctx.globalAlpha = 1.0;
+      ctx.strokeRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+    }
+  });
+  ctx.restore();
+
+  // Плашка текущей цены слева
+  const lastC = candles[candles.length - 1];
+  const curY = pToY(lastC.close);
+  ctx.fillStyle = lastC.close >= lastC.open ? "#10b981" : "#f43f5e";
+  ctx.fillRect(2, curY - 9, padL - 6, 18);
+  ctx.fillStyle = "#041008"; ctx.font = "bold 10px JetBrains Mono";
+  ctx.fillText(lastC.close.toFixed(2), 5, curY + 3.5);
+
+  // =================================================================
+  // ПОДВАЛ: СВЕЧНОЙ CVD
+  // =================================================================
+  ctx.strokeStyle = "#212c3f"; ctx.beginPath(); ctx.moveTo(padL, cvdTop); ctx.lineTo(W - padR, cvdTop); ctx.stroke();
+  ctx.fillStyle = "#8b9bb4"; ctx.font = "10px Inter";
+  ctx.fillText("CVD (Свечная дельта в лотах · серые свечи = оценочные)", padL, cvdTop - 4);
+
+  const cvdLows = candles.map(c => c.cvd_low || 0);
+  const cvdHighs = candles.map(c => c.cvd_high || 0);
+  const minCvd = Math.min(...cvdLows, 0), maxCvd = Math.max(...cvdHighs, 1);
+  const cvdToY = v => cvdTop + cvdH - ((v - minCvd) / Math.max(maxCvd - minCvd, 1e-6)) * cvdH;
+
+  const zeroY = cvdToY(0);
+  ctx.strokeStyle = "rgba(255,255,255,0.14)"; ctx.setLineDash([2, 2]);
+  ctx.beginPath(); ctx.moveTo(padL, zeroY); ctx.lineTo(W - padR, zeroY); ctx.stroke(); ctx.setLineDash([]);
+
+  const candleCovThr = (currentAnalyze?.candle_cov_pct || 50) / 100.0;
+
+  candles.forEach((c, i) => {
+    const x = padL + i * step + step / 2;
+    const isUp = (c.cvd_close || 0) >= (c.cvd_open || 0);
+    const lowCov = (c.tape_cov ?? 0) < candleCovThr;
+    const color = lowCov ? (isUp ? "#64748b" : "#475569") : (isUp ? "#10b981" : "#f43f5e");
+
+    ctx.strokeStyle = color; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, cvdToY(c.cvd_high || 0)); ctx.lineTo(x, cvdToY(c.cvd_low || 0)); ctx.stroke();
+
+    const topY = cvdToY(Math.max(c.cvd_open || 0, c.cvd_close || 0));
+    const botY = cvdToY(Math.min(c.cvd_open || 0, c.cvd_close || 0));
+    ctx.fillStyle = color;
+    ctx.fillRect(x - cw / 2, topY, cw, Math.max(1.5, botY - topY));
+  });
+
+  // Подписи времени
+  const tickCount = Math.min(8, candles.length);
+  ctx.fillStyle = "#697b92"; ctx.font = "9.5px JetBrains Mono";
+  for (let t = 0; t < tickCount; t++) {
+    const idx = Math.floor((t / Math.max(1, tickCount - 1)) * (candles.length - 1));
+    const x = padL + idx * step + step / 2;
+    ctx.fillText(candles[idx].time || "", Math.max(padL, x - 28), H - 8);
+  }
+
+  // Перекрестие при наведении
+  if (hoverCandleIdx >= 0 && hoverCandleIdx < candles.length) {
+    const hx = padL + hoverCandleIdx * step + step / 2;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, cvdTop + cvdH); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+// =====================================================================
+// ОБРАБОТЧИКИ МЫШИ И КОЛЁСИКА НА ХОЛСТЕ (ПАНОРАМА, ЗУМ, РИСОВАНИЕ)
+// =====================================================================
+const chartCanvas = document.getElementById("mainChart");
+
+chartCanvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  if (!lastChartGeom) return;
+  const rect = chartCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const ratio = Math.max(0.05, Math.min(0.95, (mx - lastChartGeom.padL) / lastChartGeom.plotW));
+  const delta = e.deltaY < 0 ? -0.18 : 0.18;
+  zoomChart(delta, ratio);
+}, { passive: false });
+
+chartCanvas.addEventListener("mousedown", e => {
+  if (!lastChartGeom || e.button !== 0) return;
+  const rect = chartCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const localIdx = Math.floor((mx - lastChartGeom.padL) / lastChartGeom.step);
+  const globalIdx = lastChartGeom.startIdx + localIdx;
+  const price = lastChartGeom.yToP(my);
+
+  if (drawTool === "pan") {
+    isDragging = true;
+    dragStartX = mx;
+    dragStartIdx = viewState.startIdx;
+  } else if (drawTool === "hline") {
+    const list = getDrawings(selectedTicker);
+    list.push({ type: "hline", p1: price, color: drawColor });
+    saveDrawings(selectedTicker, list);
+    drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+  } else if (drawTool === "line" || drawTool === "rect") {
+    isDragging = true;
+    draftShape = { type: drawTool, i1: globalIdx, p1: price, i2: globalIdx, p2: price, color: drawColor };
+  }
+});
+
+chartCanvas.addEventListener("mousemove", e => {
+  if (!lastChartGeom || !currentCandles.length) return;
+  const rect = chartCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  const localIdx = Math.floor((mx - lastChartGeom.padL) / lastChartGeom.step);
+  const globalIdx = lastChartGeom.startIdx + localIdx;
+
+  if (isDragging) {
+    if (drawTool === "pan") {
+      const dx = mx - dragStartX;
+      const dBars = Math.round(dx / lastChartGeom.step);
+      const maxStart = Math.max(0, currentCandles.length - viewState.count);
+      viewState.startIdx = Math.max(0, Math.min(maxStart, dragStartIdx - dBars));
+      viewState.userAdjusted = true;
+      drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+      return;
+    } else if (draftShape) {
+      draftShape.i2 = globalIdx;
+      draftShape.p2 = lastChartGeom.yToP(my);
+      drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+      return;
+    }
+  }
+
+  const tip = document.getElementById("chartTooltip");
+  if (localIdx >= 0 && localIdx < lastChartGeom.count && globalIdx < currentCandles.length) {
+    hoverCandleIdx = localIdx;
+    const c = currentCandles[globalIdx];
+    const covPct = Math.round((c.tape_cov || 0) * 100);
+    tip.style.display = "block";
+    tip.innerHTML = `
+      <b>${c.time}</b> | O: ${c.open} | H: ${c.high} | L: ${c.low} | C: <b>${c.close} ₽</b> | Vol: ${c.vol}<br/>
+      Дельта свечи: <b>${formatLotsDelta(c.delta)}</b> | CVD дня: <b>${formatLotsDelta(c.cvd_close)}</b> | Чистая лента: <b>${formatLotsDelta(c.tape_delta)}</b> (покрытие <b>${covPct}%</b>)
+    `;
+    drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+  } else {
+    hoverCandleIdx = -1;
+    tip.style.display = "none";
+  }
+});
+
+window.addEventListener("mouseup", () => {
+  if (!isDragging) return;
+  isDragging = false;
+  if (draftShape) {
+    const list = getDrawings(selectedTicker);
+    list.push(draftShape);
+    saveDrawings(selectedTicker, list);
+    draftShape = null;
+    drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+  }
+});
+
+
+// ПОДДЕРЖКА СЕНСОРНЫХ ЭКРАНОВ (ТАЧ / СМАРТФОНЫ): ПАНОРАМА И ЗУМ
+let touchStartDist = 0;
+let touchStartX = 0;
+let isTouchPanning = false;
+
+chartCanvas.addEventListener("touchstart", e => {
+  if (e.touches.length === 1) {
+    const t = e.touches[0];
+    const rect = chartCanvas.getBoundingClientRect();
+    const mx = t.clientX - rect.left;
+    const my = t.clientY - rect.top;
+    if (mx >= (lastChartGeom?.padL || 0) && mx <= (lastChartGeom?.padL || 0) + (lastChartGeom?.plotW || 0)) {
+      isTouchPanning = true;
+      dragStartX = mx;
+      dragStartOffset = chartPanOffset;
+    }
+  } else if (e.touches.length === 2) {
+    isTouchPanning = false;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    touchStartDist = Math.hypot(dx, dy);
+  }
+}, { passive: true });
+
+chartCanvas.addEventListener("touchmove", e => {
+  if (isTouchPanning && e.touches.length === 1) {
+    e.preventDefault();
+    const t = e.touches[0];
+    const rect = chartCanvas.getBoundingClientRect();
+    const mx = t.clientX - rect.left;
+    const dx = mx - dragStartX;
+    const barW = (lastChartGeom?.plotW || 600) / Math.max(1, chartVisibleCount);
+    const barsDelta = Math.round(dx / barW);
+    chartPanOffset = Math.max(0, dragStartOffset + barsDelta);
+    drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+  } else if (e.touches.length === 2) {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    if (touchStartDist > 0 && Math.abs(dist - touchStartDist) > 10) {
+      const delta = dist > touchStartDist ? -0.08 : 0.08;
+      zoomChart(delta, 0.5);
+      touchStartDist = dist;
+    }
+  }
+}, { passive: false });
+
+chartCanvas.addEventListener("touchend", () => {
+  isTouchPanning = false;
+  touchStartDist = 0;
+}, { passive: true });
+
+chartCanvas.addEventListener("mouseleave", () => {
+  hoverCandleIdx = -1;
+  document.getElementById("chartTooltip").style.display = "none";
+  if (!isDragging) drawSniperChart(currentAnalyze?.signal || {}, currentCandles);
+});
+
+// =====================================================================
+// УПРАВЛЕНИЕ СДЕЛКАМИ, ЭШЕЛОНАМИ И БЭКТЕСТОМ
+// =====================================================================
+function selectStock(ticker) {
+  selectedTicker = ticker;
+  renderScannerList();
+  loadTickerDetails(selectedTicker, currentTF);
+}
+
+function changeTF(tf, btn) {
+  currentTF = tf;
+  document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadTickerDetails(selectedTicker, currentTF);
+}
+
+async function postAction(payload) {
+  payload.token = getWebSecret();
+  await fetch("/api/action", {
+    method: "POST",
+    headers: apiHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload)
+  });
+  await loadDashboard(true);
+}
+
+let selectedEntryDepPct = 20;
+
+
+let entryCalcMode = "pct"; // "pct" | "risk"
+
+function setEntryCalcMode(mode, btn) {
+  entryCalcMode = mode;
+  document.getElementById("btnModePct")?.classList.toggle("active", mode === "pct");
+  document.getElementById("btnModeRisk")?.classList.toggle("active", mode === "risk");
+  document.getElementById("pctCalcInputs").style.display = mode === "pct" ? "flex" : "none";
+  document.getElementById("riskCalcInputs").style.display = mode === "risk" ? "flex" : "none";
+  updateEntryCalcPreview();
+}
+
+function setEntryDepPct(pct, btn) {
+  selectedEntryDepPct = Number(pct);
+  const inp = document.getElementById("inputDepPct");
+  if (inp) inp.value = selectedEntryDepPct;
+  document.querySelectorAll(".dep-pct-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  updateEntryCalcPreview();
+}
+
+function onCustomDepPctInput(val) {
+  let num = parseFloat(val);
+  if (isNaN(num) || num <= 0) num = 1;
+  if (num > 100) num = 100;
+  selectedEntryDepPct = num;
+  document.querySelectorAll(".dep-pct-btn").forEach(b => {
+    b.classList.toggle("active", Number(b.textContent.replace("%","")) === Math.round(num));
+  });
+  updateEntryCalcPreview();
+}
+
+function updateEntryCalcPreview() {
+  const dep = Number(dashboardData?.deposit_rub || 10000000);
+  const pct = Number(document.getElementById("inputDepPct")?.value || selectedEntryDepPct || 20);
+  const marginRub = dep * (pct / 100);
+
+  const mSum = dashboardData?.margin_summary || {};
+  const freeMargin = Number(mSum.free_margin_rub !== undefined ? mSum.free_margin_rub : dep);
+
+  const s = (currentAnalyze && currentAnalyze.signal) || (dashboardData && (dashboardData.stocks || []).find(x => x.ticker === selectedTicker));
+  const m = currentAnalyze?.margin || {};
+  const levLong = Number(m.leverage_long || s?.leverage_long || 1.0);
+  const levShort = Number(m.leverage_short || s?.leverage_short || 1.0);
+  const dlongPct = Number(m.dlong ? m.dlong * 100 : (levLong > 1 ? 100 / levLong : 100));
+  const dshortPct = Number(m.dshort ? m.dshort * 100 : (levShort > 1 ? 100 / levShort : 100));
+
+  const badge = document.getElementById("badgeTickerLeverage");
+  if (badge) {
+    badge.innerHTML = `L: <b>${levLong.toFixed(1)}x</b> (${dlongPct.toFixed(1)}%) | S: <b>${levShort.toFixed(1)}x</b> (${dshortPct.toFixed(1)}%)`;
+  }
+
+  const useLev = document.getElementById("checkUseLeverage")?.checked !== false;
+  const side = s?.calc_side || "LONG";
+  const effectiveLev = useLev ? (side === "SHORT" ? levShort : levLong) : 1.0;
+  const totalPower = marginRub * effectiveLev;
+
+  const isOverMargin = marginRub > freeMargin + 500;
+  const warnHtml = isOverMargin ? ` <span style="color:var(--red);font-weight:700">⚠️ Превышает свободную маржу (${Math.round(freeMargin).toLocaleString("ru-RU")} ₽)!</span>` : "";
+
+  const mEl = document.getElementById("entryMarginRub");
+  if (mEl) mEl.innerHTML = `${Math.round(marginRub).toLocaleString("ru-RU")} ₽ (${pct}% депо)${warnHtml}`;
+  const pEl = document.getElementById("entryPowerRub");
+  if (pEl) {
+    pEl.textContent = `~${Math.round(totalPower).toLocaleString("ru-RU")} ₽ ${useLev && effectiveLev > 1 ? `(плечо ${effectiveLev.toFixed(1)}x)` : "(без плеча)"}`;
+  }
+}
+
+async function reducePosition(ticker, pct) {
+  if (!confirm(`Сократить позицию ${ticker} на ${pct}% по текущей рыночной цене?`)) return;
+  await postAction({ action: "reduce_position", ticker, reduce_pct: pct });
+}
+
+async function setBreakeven(ticker) {
+  if (!confirm(`Перенести Stop Loss по сделке ${ticker} в безубыток (на цену входа)?`)) return;
+  await postAction({ action: "update_position_levels", ticker, to_be: true });
+}
+
+function toggleEditLevels(ticker) {
+  const box = document.getElementById(`editLevelsBox_${ticker}`);
+  if (box) {
+    box.style.display = box.style.display === "none" ? "block" : "none";
+  }
+}
+
+async function saveLevels(ticker) {
+  const tp = parseFloat(document.getElementById(`editTp_${ticker}`)?.value || 0);
+  const sl = parseFloat(document.getElementById(`editSl_${ticker}`)?.value || 0);
+  const autoPartEn = document.getElementById(`editAutoPart_${ticker}`)?.checked !== false;
+  const partTake = parseFloat(document.getElementById(`editPartTake_${ticker}`)?.value || 0);
+  const partTrig = parseFloat(document.getElementById(`editPartTrig_${ticker}`)?.value || 55);
+
+  await postAction({
+    action: "update_position_levels",
+    ticker,
+    tp: tp > 0 ? tp : undefined,
+    sl: sl > 0 ? sl : undefined,
+    auto_partial_enabled: autoPartEn && (partTake > 0),
+    partial_take_pct: autoPartEn ? partTake : 0,
+    partial_trigger_pct: partTrig
+  });
+}
+
+
+// =====================================================================
+// ОТЛОЖЕННЫЙ АВТОЗАХОД НА ОТКРЫТИИ БИРЖИ С КОНТРОЛЕМ ГЭПА
+// =====================================================================
+async function queueMarketOpenOrder(overrideSide) {
+  const s = (currentAnalyze && currentAnalyze.signal) || (dashboardData && (dashboardData.stocks || []).find(x => x.ticker === selectedTicker));
+  const side = overrideSide || (s ? (s.verdict === "SHORT" ? "SHORT" : "LONG") : "LONG");
+  const depPct = Number(document.getElementById("inputDepPct")?.value || selectedEntryDepPct || 20);
+  const useLeverage = document.getElementById("checkUseLeverage")?.checked !== false;
+  const autoPartial = document.getElementById("checkAutoPartial")?.checked !== false;
+  const customTp = parseFloat(document.getElementById("inputEntryTp")?.value || 0);
+  const customSl = parseFloat(document.getElementById("inputEntrySl")?.value || 0);
+  const maxGap = parseFloat(document.getElementById("inputMaxGapPct")?.value || 1.0);
+  const curP = s ? (s.price || 0) : 0;
+
+  const res = await postAction({
+    action: "queue_open_order",
+    ticker: selectedTicker,
+    side,
+    dep_pct: depPct,
+    use_leverage: useLeverage,
+    auto_partial: autoPartial,
+    custom_tp: customTp,
+    custom_sl: customSl,
+    max_gap_pct: maxGap,
+    ref_price: curP
+  });
+
+  if (res && res.message) {
+    alert(`⏱ Ордер на открытие биржи принят!\n\n• Бумага: ${selectedTicker} (${side})\n• Максимальный гэп: ${maxGap > 0 ? maxGap + '%' : 'любой'}\n• Бот войдёт в долю секунды при открытии торгов, если цена не улетит с гэпом выше ${maxGap}%.`);
+  }
+}
+
+async function cancelMarketOpenOrder(ticker) {
+  await postAction({
+    action: "cancel_open_order",
+    ticker
+  });
+}
+
+function renderPendingOrdersList(orders) {
+  const el = document.getElementById("pendingList");
+  const title = document.getElementById("pendingTitle");
+  if (!el || !title) return;
+
+  const list = orders || [];
+  title.textContent = `⏱ Отложенные ордера на открытие рынка (${list.length})`;
+
+  if (!list.length) {
+    el.innerHTML = `<div style="color:var(--muted)">Нет активных отложенных ордеров на открытие. Выберите акцию и нажмите «⏱ На открытии биржи» (сработает утром в первую секунду торгов).</div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(o => {
+    const isLong = o.side === "LONG";
+    const sideCol = isLong ? "var(--green-bright)" : "var(--red)";
+    const gapStr = o.max_gap_pct > 0 ? `гэп ≤ ${o.max_gap_pct}%` : "любой гэп";
+    const tpStr = o.custom_tp > 0 ? ` | TP: ${o.custom_tp} ₽` : " | TP: авто";
+    const slStr = o.custom_sl > 0 ? ` | SL: ${o.custom_sl} ₽` : " | SL: авто";
+    return `
+      <div class="trade-card" style="border-color:rgba(168,85,247,0.35);padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div>
+            <b style="color:#fff;font-size:13px">${o.ticker}</b> · <span style="color:${sideCol};font-weight:700">${o.side}</span>
+            <span class="tf-mini" style="background:rgba(168,85,247,0.15);color:#d8b4fe;border-color:rgba(168,85,247,0.4);margin-left:6px">Ждёт открытие (${gapStr})</span>
+          </div>
+          <button class="btn" style="padding:2px 8px;font-size:10px;color:#fda4af;border-color:rgba(244,63,94,0.4)" onclick="cancelMarketOpenOrder('${o.ticker}')">✕ Отменить ордер</button>
+        </div>
+        <div class="mono" style="font-size:11px;color:var(--muted);margin-top:5px">
+          Реф. цена закрытия: <b>${o.ref_price ? o.ref_price.toFixed(2) + ' ₽' : '--'}</b> | Депо: <b>${o.dep_pct}%</b> | Плечо: <b>${o.use_leverage ? 'ВКЛ' : 'ВЫКЛ'}</b>${tpStr}${slStr}
+        </div>
+        <div style="font-size:11px;color:#cbd5e1;margin-top:4px">
+          Создан: ${o.created_at || ''} · <i>Бот автоматически откроет позицию в первую миллисекунду сессии.</i>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function trackSelectedManual(side) {
+  const depPct = Number(document.getElementById("inputDepPct")?.value || selectedEntryDepPct || 20);
+  const useLeverage = document.getElementById("checkUseLeverage")?.checked !== false;
+  const autoPartial = document.getElementById("checkAutoPartial")?.checked !== false;
+  
+  const tpVal = document.getElementById("inputEntryTp")?.value;
+  const slVal = document.getElementById("inputEntrySl")?.value;
+  const payload = {
+    action: "track_manual",
+    ticker: selectedTicker,
+    side,
+    dep_pct: depPct,
+    use_leverage: useLeverage,
+    auto_partial: autoPartial
+  };
+  if (tpVal !== undefined && tpVal !== "") payload.custom_tp = parseFloat(tpVal);
+  if (slVal !== undefined && slVal !== "") payload.custom_sl = parseFloat(slVal);
+  if (entryCalcMode === "risk") {
+    payload.risk_rub = parseFloat(document.getElementById("inputRiskRub")?.value || 25000);
+  }
+
+    const validTps = entryTakeProfits.filter(t => t.price > 0 && t.pct > 0);
+  if (validTps.length > 0) payload.take_profits = validTps;
+  await postAction(payload);
+}
+
+async function untrackSelectedManual() {
+  await postAction({ action: "untrack", ticker: selectedTicker });
+}
+
+async function untrackTicker(ticker) {
+  await postAction({ action: "untrack", ticker });
+}
+
+async function untrackStrat(strategy, ticker) {
+  await postAction({ action: "untrack_strat", strategy, ticker });
+}
+
+async function clearTracked() {
+  if (!confirm("Очистить все открытые сделки?")) return;
+  await postAction({ action: "clear_tracked" });
+}
+
+async function resetStats() {
+  if (!confirm("Обнулить статистику винрейта и историю сделок?")) return;
+  await postAction({ action: "reset_stats" });
+}
+
+function downloadCvdCsv() {
+  const token = encodeURIComponent(getWebSecret());
+  window.open(`/api/cvd.csv?token=${token}`, "_blank");
+}
+
+function openTiersModal() {
+  renderTiersModal();
+  document.getElementById("tiersModal").style.display = "flex";
+}
+function closeTiersModal() {
+  document.getElementById("tiersModal").style.display = "none";
+}
+
+function renderTiersModal() {
+  const tiers = dashboardData?.tiers || {};
+  const tierNames = {
+    "1": "1️⃣ Первая линия (Голубые фишки IMOEX)",
+    "2": "2️⃣ Второй эшелон (Ликвидные бумаги)",
+    "3": "3️⃣ Третий эшелон (Повышенная волатильность)"
+  };
+
+  let html = "";
+  for (const tKey of ["1", "2", "3"]) {
+    const list = tiers[tKey] || [];
+    const allOn = list.length > 0 && list.every(x => x.active);
+    html += `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px">
+        <b>${tierNames[tKey]} (${list.filter(x => x.active).length}/${list.length})</b>
+        <button class="btn" onclick="toggleWholeTier(${tKey}, ${!allOn})">
+          ${allOn ? '❌ Выключить эшелон' : '☑️ Включить весь эшелон'}
+        </button>
+      </div>
+      <div class="tier-grid">
+        ${list.map(item => `
+          <div class="tier-chip ${item.active ? 'on' : ''}" onclick="toggleSingleTicker('${item.ticker}')">
+            <span><b>${item.ticker}</b> <span style="color:var(--muted);font-size:10.5px">${item.name}</span></span>
+            <span>${item.active ? '✅' : '⬜'}</span>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+  document.getElementById("tiersModalContent").innerHTML = html;
+}
+
+async function toggleSingleTicker(ticker) {
+  await postAction({ action: "toggle_ticker", ticker });
+  renderTiersModal();
+}
+
+async function toggleWholeTier(tier, on) {
+  await postAction({ action: "tier_set", tier, on });
+  renderTiersModal();
+}
+
+async function openBacktestModal(days = 60) {
+  document.getElementById("btModal").style.display = "flex";
+  document.getElementById("btModalTitle").textContent = `🧪 ЧЕСТНЫЙ ПОРТФЕЛЬНЫЙ БЭКТЕСТ ЗА ${days} ДНЕЙ`;
+  document.getElementById("btModalContent").innerHTML = `
+    <div style="padding:26px;text-align:center" class="mono">
+      ⏳ Сервер загружает дневные свечи T-Invest API и прогоняет историю по всем выбранным бумагам за ${days} торговых дней...
+    </div>
+  `;
+
+  try {
+    const token = encodeURIComponent(getWebSecret());
+    const res = await fetch(`/api/backtest?days=${days}&token=${token}`, { headers: apiHeaders() });
+    const data = await res.json();
+    if (!data.ok) {
+      document.getElementById("btModalContent").innerHTML = `<div style="color:var(--red)">Ошибка бэктеста: ${data.error || 'неизвестно'}</div>`;
+      return;
+    }
+
+    const pnlCol = data.pnl_rub >= 0 ? "var(--green-bright)" : "var(--red)";
+    const rows = (data.per_ticker || []).sort((a, b) => b.pnl_pct - a.pnl_pct);
+
+    document.getElementById("btModalContent").innerHTML = `
+      <div style="background:var(--panel-2);border:1px solid var(--border);padding:13px 16px;border-radius:8px;margin-bottom:12px" class="mono">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>🏢 Проверено бумаг: <b>${data.tickers}/${data.watchlist_size}</b> | Всего сделок: <b>${data.trades}</b></div>
+          <div>🎯 Винрейт портфеля: <b style="color:var(--cyan)">${data.winrate}%</b> | Средний PnL на бумагу: <b>${data.avg_pnl_per_ticker_pct >= 0 ? '+' : ''}${data.avg_pnl_per_ticker_pct}%</b></div>
+        </div>
+        <div style="margin-top:8px;font-size:14px">
+          💰 Результат на депозит ${Math.round(data.deposit_rub).toLocaleString('ru-RU')} ₽:
+          <b style="color:${pnlCol}">${data.pnl_rub >= 0 ? '+' : ''}${Math.round(data.pnl_rub).toLocaleString('ru-RU')} ₽</b>
+        </div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:6px">${data.note || ''}</div>
+      </div>
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th>Тикер</th>
+            <th>Бумага</th>
+            <th>Сделок</th>
+            <th>Побед</th>
+            <th>Винрейт</th>
+            <th>Итоговый PnL</th>
+            <th>Макс. просадка</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => {
+            const c = r.pnl_pct >= 0 ? "var(--green-bright)" : "var(--red)";
+            return `
+              <tr onclick="closeBtModal();selectStock('${r.ticker}')" style="cursor:pointer">
+                <td><b>${r.ticker}</b></td>
+                <td>${r.name}</td>
+                <td>${r.trades}</td>
+                <td>${r.wins}</td>
+                <td>${r.winrate}%</td>
+                <td style="color:${c};font-weight:700">${r.pnl_pct >= 0 ? '+' : ''}${r.pnl_pct}%</td>
+                <td style="color:var(--amber)">-${r.max_dd_pct}%</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    document.getElementById("btModalContent").innerHTML = `<div style="color:var(--red)">Ошибка соединения с сервером при расчёте бэктеста.</div>`;
+  }
+}
+
+function closeBtModal() {
+  document.getElementById("btModal").style.display = "none";
+}
+
+window.addEventListener("resize", () => drawSniperChart(currentAnalyze?.signal || {}, currentCandles));
+setInterval(() => {
+  if (!isDragging) loadDashboard(false);
+}, 12000);
+
+// =====================================================================
+// ПАЗЛ-КОНСТРУКТОР ТЕРМИНАЛА (КАК В Т-ИНВЕСТИЦИЯХ): DRAG & DROP ВИДЖЕТОВ
+// =====================================================================
+let draggedCard = null;
+
+function initPuzzleWidgets() {
+  const cards = document.querySelectorAll(".card[draggable='true']");
+  
+  cards.forEach(card => {
+    const header = card.querySelector(".card-header") || card.querySelector(".detail-top");
+    if (header && !card.querySelector(".btn-card-toggle")) {
+      const toolWrap = document.createElement("span");
+      toolWrap.className = "card-tools";
+      toolWrap.innerHTML = `
+        <button type="button" class="card-tool-btn btn-card-width" id="btnWidth_${card.id}" title="Горизонтальный уровень: 1/2 ширины (рядом на одном уровне) или 100% (на всю ширину)" onclick="toggleWidgetWidth('${card.id}')">↔ 1/2</button>
+        <button type="button" class="card-tool-btn btn-card-toggle" title="Свернуть / Развернуть" onclick="toggleWidgetCollapse('${card.id}')">−/+</button>
+      `;
+      header.appendChild(toolWrap);
+    }
+
+    card.addEventListener("dragstart", e => {
+      // Игнорируем драг, если кликнули по инпутам, кнопкам или холсту графика
+      if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON" || e.target.tagName === "CANVAS") {
+        e.preventDefault();
+        return;
+      }
+      draggedCard = card;
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", card.id);
+    });
+
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      document.querySelectorAll(".card").forEach(c => c.classList.remove("drag-over"));
+      draggedCard = null;
+      saveWidgetLayout();
+    });
+
+    card.addEventListener("dragover", e => {
+      e.preventDefault();
+      if (!draggedCard || draggedCard === card) return;
+      e.dataTransfer.dropEffect = "move";
+      card.classList.add("drag-over");
+    });
+
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("drag-over");
+    });
+
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      if (!draggedCard || draggedCard === card) return;
+
+      const p1 = draggedCard.parentElement;
+      const p2 = card.parentElement;
+
+      if (p1 === p2) {
+        // Меняем местами или вставляем до/после внутри одной сетки
+        const children = Array.from(p1.children);
+        const idx1 = children.indexOf(draggedCard);
+        const idx2 = children.indexOf(card);
+        if (idx1 < idx2) {
+          p1.insertBefore(draggedCard, card.nextSibling);
+        } else {
+          p1.insertBefore(draggedCard, card);
+        }
+      } else {
+        // Перенос между верхней сеткой (main-grid) и нижней (bottom-grid)
+        p2.insertBefore(draggedCard, card);
+      }
+      saveWidgetLayout();
+    });
+  });
+
+  restoreWidgetLayout();
+}
+
+
+function toggleWidgetWidth(cardId) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  card.classList.toggle("card-full-width");
+  const isFull = card.classList.contains("card-full-width");
+  const btn = document.getElementById("btnWidth_" + cardId);
+  if (btn) btn.textContent = isFull ? "↔ 100%" : "↔ 1/2";
+
+  const widths = JSON.parse(localStorage.getItem("tg_widget_widths") || "{}");
+  widths[cardId] = isFull;
+  localStorage.setItem("tg_widget_widths", JSON.stringify(widths));
+  if (cardId === "detailCard") {
+    setTimeout(() => { if (typeof drawSniperChart === "function") drawSniperChart(currentAnalyze?.signal || {}, currentCandles); }, 60);
+  }
+}
+
+function toggleWidgetCollapse(cardId) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  card.classList.toggle("collapsed");
+  const collapsed = JSON.parse(localStorage.getItem("tg_collapsed_widgets") || "{}");
+  collapsed[cardId] = card.classList.contains("collapsed");
+  localStorage.setItem("tg_collapsed_widgets", JSON.stringify(collapsed));
+}
+
+function saveWidgetLayout() {
+  const mainGrid = document.querySelector(".main-grid");
+  const bottomGrid = document.querySelector(".bottom-grid");
+  if (!mainGrid || !bottomGrid) return;
+
+  const mainIds = Array.from(mainGrid.querySelectorAll(".card")).map(c => c.id).filter(Boolean);
+  const bottomIds = Array.from(bottomGrid.querySelectorAll(".card")).map(c => c.id).filter(Boolean);
+
+  const layout = { main: mainIds, bottom: bottomIds };
+  localStorage.setItem("tg_puzzle_layout", JSON.stringify(layout));
+}
+
+function restoreWidgetLayout() {
+  try {
+    const raw = localStorage.getItem("tg_puzzle_layout");
+    if (!raw) return;
+    const layout = JSON.parse(raw);
+    const mainGrid = document.querySelector(".main-grid");
+    const bottomGrid = document.querySelector(".bottom-grid");
+    if (!mainGrid || !bottomGrid) return;
+
+    if (Array.isArray(layout.main)) {
+      layout.main.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) mainGrid.appendChild(el);
+      });
+    }
+    if (Array.isArray(layout.bottom)) {
+      layout.bottom.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) bottomGrid.appendChild(el);
+      });
+    }
+
+    // Восстанавливаем состояние свёрнутых карточек
+    const collapsed = JSON.parse(localStorage.getItem("tg_collapsed_widgets") || "{}");
+    Object.entries(collapsed).forEach(([id, isCol]) => {
+      const el = document.getElementById(id);
+      if (el && isCol) el.classList.add("collapsed");
+    });
+
+    // Восстанавливаем горизонтальную ширину (1/2 или 100% на одном уровне)
+    const widths = JSON.parse(localStorage.getItem("tg_widget_widths") || "{}");
+    Object.entries(widths).forEach(([id, isFull]) => {
+      const el = document.getElementById(id);
+      if (el && isFull) {
+        el.classList.add("card-full-width");
+        const btn = document.getElementById("btnWidth_" + id);
+        if (btn) btn.textContent = "↔ 100%";
+      }
+    });
+  } catch (err) {
+    console.warn("restoreWidgetLayout error:", err);
+  }
+}
+
+function resetWidgetLayout() {
+  localStorage.removeItem("tg_puzzle_layout");
+  localStorage.removeItem("tg_collapsed_widgets");
+  localStorage.removeItem("tg_widget_widths");
+  location.reload();
+}
+
+// Запуск инициализации пазла после загрузки DOM
+window.addEventListener("DOMContentLoaded", initPuzzleWidgets);
+setTimeout(initPuzzleWidgets, 100);
+
+loadDashboard(false);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a549a9712e01f788',t:'MTc5MzY5MDkwMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a549a9712e01f788',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
