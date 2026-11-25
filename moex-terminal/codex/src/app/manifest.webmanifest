@@ -1,0 +1,13 @@
+{
+  "name": "MOEX Terminal",
+  "short_name": "MOEX",
+  "description": "Аналитический терминал Московской биржи: графики, SMC Pro, виртуальный счёт.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#131722",
+  "theme_color": "#131722",
+  "lang": "ru",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

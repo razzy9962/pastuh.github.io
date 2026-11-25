@@ -1,0 +1,23 @@
+# Blueprint для Render: достаточно подключить приватный репозиторий —
+# сервис и переменные окружения создадутся автоматически.
+services:
+  - type: web
+    name: moex-terminal
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: codex
+    buildCommand: npm ci --no-audit --no-fund && NODE_OPTIONS=--max-old-space-size=460 npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.1"
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=420"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Токен Т-Инвест прописан явно: репозиторий приватный, отдельная настройка не нужна.
+      - key: TINKOFF_TOKEN
+        value: t.EEIvBTMdzSxknlGgeVXIL4DP3avSQRAT_Rp-zqf5a01DYZc2FwTj4y0DNiebjMkKAJshiDNfUMCrPYNvDtA4QA
